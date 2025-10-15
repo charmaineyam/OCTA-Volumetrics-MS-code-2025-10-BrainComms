@@ -1,0 +1,1453 @@
+---
+title: "Brain communications- Demographics & models"
+format: revealjs
+editor: visual
+---
+
+## Load packages
+
+```{r}
+
+rm(list = ls())
+pacman::p_load(tidyverse,
+               janitor,
+               rio,
+               here,
+               gt,
+               GGally,
+               gtExtras,
+               gtsummary,
+               tidymodels,
+               readxl,
+               dlookr,
+               DataExplorer,
+               arsenal,
+               ggstatsplot,
+               nlme,
+               pROC, 
+               emmeans,
+               sjPlot,
+               AICcmodavg,
+               lme4,
+               naniar,
+               skimr,
+               lmerTest,
+               easystats,
+               ggstatsplot,
+               stats,
+               pwr, 
+               patchwork)
+
+```
+
+## Demographics- by patient MS
+
+```{r}
+
+oct_octa_clin <- import(here('data', 'processed', 'octa_oct_clin_20241201.rds'))
+
+oct_octa_clin %>% filter(case ==  "P", lower_layer == 'GCIPL', region == 'Gen') %>%distinct(patient_id) 
+
+# Time on DMT in days
+oct_octa_clin$lastdmt_start <- as.Date(oct_octa_clin$lastdmt_start)
+oct_octa_clin$exam_date <- as.Date(oct_octa_clin$exam_date)
+
+oct_octa_clin$time_on_dmt_days <- as.numeric(oct_octa_clin$exam_date - oct_octa_clin$lastdmt_start)
+
+oct_octa_clin$time_on_dmt_days 
+
+# Optionally, in years
+oct_octa_clin$time_on_dmt_years <- oct_octa_clin$time_on_dmt_days / 365.25
+oct_octa_clin$time_on_dmt_years 
+
+#323 patients
+
+basic_demo_ms <- oct_octa_clin %>% filter(case ==  "P", lower_layer == 'GCIPL', region == 'Gen') %>%
+  distinct(patient_id, age, sex, ethnicity, ms_type_now, disease_duration, relapses_last_2_yrs_baseline, edss, bmi, smoke_status, pack_years, units_week, hypertension, cholesterol, diabetes, lastoct_dmt, prop_dmt, het_prop_dmt, naive_at_baseline, month, dmt_1, dmt_2, dmt_3, dmt_4, dmt_5, dmt_6, dmt_1_stopped_reason, dmt_2_stopped_reason, dmt_3_stopped_reason, dmt_4_stopped_reason, dmt_5_stopped_reason, lastoct_dmt, time_on_dmt_years) 
+
+#Age
+summary(basic_demo_ms$age) 
+sd(basic_demo_ms$age)
+hist(basic_demo_ms$age, col = "firebrick3", breaks=50)
+ 
+#Gender
+table(basic_demo_ms$sex)
+ 
+#Ethnicity
+table(basic_demo_ms$ethnicity)
+ 
+#Phenotype
+table(basic_demo_ms$ms_type_now)
+ 
+#Disease duration
+summary(basic_demo_ms$disease_duration)
+sd(basic_demo_ms$disease_duration)
+hist(basic_demo_ms$disease_duration, col = "firebrick3", breaks=50)
+
+basic_demo_ms <- basic_demo_ms%>%mutate(bl_arr= relapses_last_2_yrs_baseline/2)%>%relocate(bl_arr, .after= relapses_last_2_yrs_baseline)
+
+#Baseline ARR
+summary(basic_demo_ms$bl_arr)
+sd(basic_demo_ms$bl_arr)
+hist(basic_demo_ms$bl_arr, col = "firebrick3", breaks=50)
+
+basic_demo_ms$edss <- as.numeric(basic_demo_ms$edss)
+
+#EDSS
+class(basic_demo_ms$edss)
+summary(basic_demo_ms$edss, na.rm = T)
+sd(basic_demo_ms$edss, na.rm = T)
+hist(basic_demo_ms$edss, col = "firebrick3", breaks=50) 
+
+#Current DMT
+table(basic_demo_ms$lastoct_dmt)
+
+basic_demo_ms %>%filter(is.na(lastoct_dmt))
+
+#DMT proportion
+summary(basic_demo_ms$prop_dmt, na.rm = T)
+sd(basic_demo_ms$prop_dmt, na.rm = T)
+hist(basic_demo_ms$prop_dmt, col = "firebrick3", breaks=50)
+
+#HET
+summary(basic_demo_ms$het_prop_dmt, na.rm = T)
+sd(basic_demo_ms$het_prop_dmt, na.rm = T)
+hist(basic_demo_ms$het_prop_dmt, col = "firebrick3", breaks=50)
+
+#Time on last DMT
+summary(basic_demo_ms$time_on_dmt_years, na.rm = T)
+sd(basic_demo_ms$time_on_dmt_years, na.rm = T)
+hist(basic_demo_ms$time_on_dmt_years, col = "firebrick3", breaks=50)
+
+basic_demo_ms%>%
+  count(lastoct_dmt)
+
+#Smoke status
+table(basic_demo_ms$smoke_status)
+
+#pack-years
+#Need to filter out 0 pack years
+summary(basic_demo_ms$pack_years,na.rm = T)
+sd(basic_demo_ms$pack_years,na.rm = T)
+hist(basic_demo_ms$pack_years, col = "firebrick3", breaks=50)
+
+#BMI
+summary(basic_demo_ms$bmi,na.rm = T)
+sd(basic_demo_ms$bmi,na.rm = T)
+hist(basic_demo_ms$bmi, col = "firebrick3", breaks=50)
+
+#Alcohol
+basic_demo_ms$units_week <- as.numeric(basic_demo_ms$units_week)
+oct_octa_clin$units_week <- as.numeric(oct_octa_clin$units_week)
+
+summary(basic_demo_ms$units_week,na.rm = T)
+sd(basic_demo_ms$units_week)
+hist(basic_demo_ms$units_week, col = "firebrick3", breaks=50)
+
+#Hypertension
+table(basic_demo_ms$hypertension)
+
+basic_demo_ms%>%filter(hypertension == "yes")
+
+#Cholesterol
+table(basic_demo_ms$cholesterol)
+
+#Diabetes
+table(basic_demo_ms$diabetes)
+
+#Naive
+table(basic_demo_ms$naive_at_baseline, basic_demo_ms$month)
+#96 truly naive
+#184 on 1st DMT
+
+#Switch reason
+basic_demo_ms_not_naive<-basic_demo_ms%>%filter(naive_at_baseline=="no")
+basic_demo_ms_naive<-basic_demo_ms%>%filter(naive_at_baseline=="yes")
+
+basic_demo_ms_not_naive%>%select(patient_id,dmt_1_stopped_reason, dmt_2_stopped_reason, dmt_3_stopped_reason, dmt_4_stopped_reason, dmt_5_stopped_reason)
+
+basic_demo_ms_naive%>%tabyl(lastoct_dmt)
+
+#filter last DMT
+basic_demo_ms_not_naive <- basic_demo_ms_not_naive %>%
+  mutate(
+    lastoct_dmt = case_when(
+      !is.na(dmt_6) ~ dmt_6,
+      is.na(dmt_6) & !is.na(dmt_5) ~ dmt_5,
+      is.na(dmt_5) & !is.na(dmt_4) ~ dmt_4,
+      is.na(dmt_4) & !is.na(dmt_3) ~ dmt_3,
+      is.na(dmt_3) & !is.na(dmt_2) ~ dmt_2,
+      is.na(dmt_2) & !is.na(dmt_1) ~ dmt_1,
+      .default = NA
+    ))
+
+basic_demo_ms_not_naive<-basic_demo_ms_not_naive %>%
+  mutate(
+    last_dmt_stop_reason = pmap_chr(
+      list(dmt_1_stopped_reason, dmt_2_stopped_reason, dmt_3_stopped_reason,
+           dmt_4_stopped_reason, dmt_5_stopped_reason),
+      ~ {
+        reasons <- c(...)
+        # Take the last non-NA stop reason
+        last_reason <- rev(reasons[!is.na(reasons)])[1]
+        ifelse(is.null(last_reason), NA_character_, last_reason)
+      }
+    )
+  )
+
+basic_demo_ms_not_naive %>%
+  count(last_dmt_stop_reason, sort = TRUE)
+
+
+#Type of switch
+basic_demo_ms_not_naive <- basic_demo_ms_not_naive %>%
+  mutate(
+    # Find the current/last DMT
+    lastoct_dmt = case_when(
+      !is.na(dmt_6) ~ dmt_6,
+      is.na(dmt_6) & !is.na(dmt_5) ~ dmt_5,
+      is.na(dmt_5) & !is.na(dmt_4) ~ dmt_4,
+      is.na(dmt_4) & !is.na(dmt_3) ~ dmt_3,
+      is.na(dmt_3) & !is.na(dmt_2) ~ dmt_2,
+      is.na(dmt_2) & !is.na(dmt_1) ~ dmt_1,
+      TRUE ~ NA_character_
+    ),
+    # Find the previous DMT (the one right before last)
+    prev_dmt = pmap_chr(
+      list(dmt_1, dmt_2, dmt_3, dmt_4, dmt_5, dmt_6),
+      ~ {
+        dmts <- c(...)
+        # Keep only non-NA DMTs
+        dmts_non_na <- dmts[!is.na(dmts)]
+        # Take the second-to-last DMT (NA if only one)
+        if(length(dmts_non_na) < 2) NA_character_ else dmts_non_na[length(dmts_non_na)-1]
+      }
+    ),
+    # Combine to show switch
+    last_switch = ifelse(!is.na(prev_dmt) & !is.na(lastoct_dmt),
+                         paste(prev_dmt, "→", lastoct_dmt),
+                         NA_character_)
+  )
+
+basic_demo_ms_not_naive %>%
+  filter(!is.na(last_switch)) %>%
+  count(last_switch) %>%
+  mutate(percent = n / sum(n) * 100)
+
+```
+
+## Demographics- HC
+
+```{r}
+
+oct_octa_clin %>% filter(case ==  "C", lower_layer == 'GCIPL', region == 'Gen')%>%distinct(patient_id) 
+
+#80 healthy controls
+
+basic_demo_hc <- oct_octa_clin %>% filter(case ==  "C", lower_layer == 'GCIPL', region == 'Gen') %>%
+  distinct(patient_id, age, sex, smoke_status, pack_years, units_week, hypertension, cholesterol, diabetes)
+
+#Age
+ summary(basic_demo_hc$age)
+ sd(basic_demo_hc$age)
+ hist(basic_demo_hc$age, col = "firebrick3", breaks=50)
+
+#Gender
+ table(basic_demo_hc$sex)
+ 
+#Smoke status
+table(basic_demo_hc$smoke_status)
+
+summary(basic_demo_hc$pack_years,na.rm = T)
+sd(basic_demo_hc$pack_years,na.rm = T)
+hist(basic_demo_hc$pack_years, col = "firebrick3", breaks=50)
+
+#Alcohol
+summary(basic_demo_hc$units_week,na.rm = T)
+sd(basic_demo_hc$units_week,na.rm = T)
+hist(basic_demo_hc$units_week, col = "firebrick3", breaks=50)
+
+#Hypertension
+table(basic_demo_hc$hypertension)
+
+#Cholesterol
+table(basic_demo_hc$cholesterol)
+
+#Diabetes
+table(basic_demo_hc$diabetes)
+
+```
+
+## Check summary based on eyes
+
+```{r}
+
+general <- oct_octa_clin %>% 
+filter(region == 'Gen' & lower_layer == 'GCIPL') 
+
+general%>%distinct(patient_id)
+
+general%>%filter(!(is.na(vad)))%>%distinct(patient_id)
+
+general_P <- general %>%
+  filter(case == 'P')
+
+general_P%>%distinct(patient_id)
+
+general_P %>% count(on)
+
+general_P %>% 
+  count(oct_optic_neuritis)
+
+```
+
+## t-tests
+
+```{r}
+
+general_demo <- general%>%distinct(patient_id, age, sex, case, smoke_status, pack_years, units_week, hypertension, cholesterol, diabetes)
+
+general_demo <-general_demo %>% mutate(cardiovascular = case_when(
+  hypertension== "yes"|cholesterol == "yes"|diabetes =="yes" ~ "yes",
+  .default = "no"))
+
+
+age.ttest <- t.test(basic_demo_hc$age, basic_demo_ms$age, var.equal = TRUE)
+age.ttest
+
+#no significant difference
+
+#Gender differences- HC & MS
+
+ggpiestats(
+  data = general_demo,
+  x= sex,
+  y=case
+) +
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(
+    colour= "black",
+    size= 14,
+    hjust=0
+  )
+)
+
+#Smokers
+
+ggpiestats(
+  data = general_demo,
+  x= smoke_status,
+  y=case
+) +
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(
+    colour= "black",
+    size= 14,
+    hjust=0
+  )
+)
+
+#CV risk factors
+
+ggpiestats(
+  data = general_demo,
+  x= cardiovascular,
+  y=case
+) +
+  ggplot2::theme(
+    plot.title = ggplot2::element_text(
+    colour= "black",
+    size= 14,
+    hjust=0
+  )
+)
+
+```
+
+## OCT-summary
+
+```{r}
+
+#Patients
+summary(general_P$av_6mm)
+sd(general_P$av_6mm)
+hist(general_P$av_6mm, col = "firebrick3", breaks=50)
+
+summary(general_P$rnfl_mean_g)
+sd(general_P$rnfl_mean_g,na.rm = T)
+hist(general_P$rnfl_mean_g, col = "firebrick3", breaks=50)
+
+#NON- OCT
+
+summary(general_non$av_6mm)
+sd(general_non$av_6mm)
+hist(general_non$av_6mm, col = "firebrick3", breaks=50)
+
+summary(general_non$rnfl_mean_g)
+sd(general_non$rnfl_mean_g)
+hist(general_non$rnfl_mean_g, col = "firebrick3", breaks=50)
+
+
+#ON- OCT
+summary(general_on$av_6mm)
+sd(general_on$av_6mm)
+hist(general_on$av_6mm, col = "firebrick3", breaks=50)
+
+summary(general_on$rnfl_mean_g)
+sd(general_on$rnfl_mean_g, na.rm = T)
+hist(general_on$rnfl_mean_g, col = "firebrick3", breaks=50)
+
+
+#HCs
+summary(general_C$av_6mm)
+sd(general_C$av_6mm)
+hist(general_C$av_6mm, col = "firebrick3", breaks=50)
+
+summary(general_C$rnfl_mean_g)
+sd(general_C$rnfl_mean_g)
+hist(general_C$rnfl_mean_g, col = "firebrick3", breaks=50)
+
+
+```
+
+## Regression models -eye status 
+
+```{r}
+
+#GCIPL
+case_gcipl_lmm <- lme(av_6mm ~ eye_status2 + age + sex, data = general, random=~1|patient_id, na.action=na.omit)
+summary(case_gcipl_lmm)
+intervals(case_gcipl_lmm)
+multicollinearity(case_gcipl_lmm)
+
+emmeans_gcipl <-emmeans(case_gcipl_lmm, "eye_status2")
+emmeans(emmeans_gcipl, pairwise ~ "eye_status2", infer = T) 
+emmeans(emmeans_gcipl, pairwise ~ "eye_status2", infer = T) %>% plot(comparisons = T)
+tidy(emmeans_gcipl)
+plot_model(case_gcipl_lmm, type = 'emm', terms = c('eye_status2'), show.values = TRUE)
+
+boxplot(av_6mm ~ eye_status2, data=general, main="Macular GCIPL thickness in eyes", 
+   xlab="Eye status", ylab="mGCIPL (microns)", names= c("HC", "NON", "ON"), show.values = TRUE)
+
+ggplot(general, aes(
+        x = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON")),
+        y = av_6mm,
+        fill = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON"))
+      )) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1, alpha = 0.4, size = 1.5) +
+  labs(
+    title = "GCIPL based on Eye status",
+    x = "Eye Status",
+    y = "macular GCIPL (microns)"
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange", "pink")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+gcipl_box <- ggplot(general, aes(
+        x = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON")),
+        y = av_6mm,
+        fill = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON"))
+      )) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1, alpha = 0.4, size = 1.5) +
+  labs(
+    title = "GCIPL based on Eye status",
+    x = "Eye Status",
+    y = "macular GCIPL (microns)"
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange", "pink")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+
+#pRNFL
+case_prnfl_lmm <- lme(rnfl_mean_g ~ eye_status2 + age + sex, data = general, random=~1|patient_id, na.action=na.omit)
+summary(case_prnfl_lmm)
+intervals(case_prnfl_lmm)
+multicollinearity(case_prnfl_lmm)
+
+emmeans_rnfl <-emmeans(case_prnfl_lmm, "eye_status2")
+emmeans(emmeans_rnfl, pairwise ~ "eye_status2", infer = T) 
+emmeans(emmeans_rnfl, pairwise ~ "eye_status2", infer = T) %>% plot(comparisons = T)
+tidy(emmeans_rnfl)
+plot_model(case_prnfl_lmm, type = 'emm', terms = c('eye_status2'), show.values = TRUE)
+
+boxplot(rnfl_mean_g ~ eye_status2, data=general, main="pRNFL thickness in eyes", 
+   xlab="Eye status", ylab="pRNFL (microns)", names= c("HC", "NON", "ON"), show.values = TRUE)
+
+ggplot(general, aes(
+        x = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON")),
+        y = rnfl_mean_g,
+        fill = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON"))
+      )) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1, alpha = 0.4, size = 1.5) +
+  labs(
+    title = "pRNFL based on Eye status",
+    x = "Eye Status",
+    y = "pRNFL (microns)"
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange", "pink")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+rnfl_box<-ggplot(general, aes(
+        x = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON")),
+        y = rnfl_mean_g,
+        fill = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON"))
+      )) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1, alpha = 0.4, size = 1.5) +
+  labs(
+    title = "pRNFL based on Eye status",
+    x = "Eye Status",
+    y = "pRNFL (microns)"
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange", "pink")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+#INL
+case_inl_lmm <- lme(av_6mm ~ eye_status2 + age + sex, data = general_inl, random=~1|patient_id, na.action=na.omit)
+summary(case_inl_lmm)
+intervals(case_inl_lmm)
+multicollinearity(case_inl_lmm)
+
+emmeans_inl <-emmeans(case_inl_lmm, "eye_status2")
+emmeans(emmeans_inl, pairwise ~ "eye_status2", infer = T) 
+emmeans(emmeans_inl, pairwise ~ "eye_status2", infer = T) %>% plot(comparisons = T)
+tidy(emmeans_inl)
+plot_model(case_inl_lmm, type = 'emm', terms = c('eye_status2'), show.values = TRUE)
+
+boxplot(av_6mm  ~ eye_status2, data=general_inl, main="Macular INL thickness in eyes", 
+   xlab="Eye status", ylab="INL (microns)", names= c("HC", "NON", "ON"), show.values = TRUE)
+
+ggplot(general_inl, aes(
+        x = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON")),
+        y = av_6mm,
+        fill = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON"))
+      )) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1, alpha = 0.4, size = 1.5) +
+  labs(
+    title = "INL based on Eye status",
+    x = "Eye Status",
+    y = "INL (microns)"
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange", "pink")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+inl_box <- ggplot(general_inl, aes(
+        x = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON")),
+        y = av_6mm,
+        fill = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON"))
+      )) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1, alpha = 0.4, size = 1.5) +
+  labs(
+    title = "INL based on Eye status",
+    x = "Eye Status",
+    y = "INL (microns)"
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange", "pink")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+#vad
+case_vad_lmm <- lme(vad ~ eye_status2 + age + sex, data = general, random=~1|patient_id, na.action=na.omit)
+summary(case_vad_lmm)
+intervals(case_vad_lmm)
+multicollinearity(case_vad_lmm)
+
+emmeans_vad <-emmeans(case_vad_lmm, "eye_status2")
+emmeans(emmeans_vad, pairwise ~ "eye_status2", infer = T) 
+emmeans(emmeans_vad, pairwise ~ "eye_status2", infer = T) %>% plot(comparisons = T)
+tidy(emmeans_inl)
+plot_model(case_vad_lmm, type = 'emm', terms = c('eye_status2'), show.values = TRUE)
+
+boxplot(vad ~ eye_status2, data=general, main="Vessel area density in eyes", 
+   xlab="Eye status", ylab="Vessel area density (%)", names= c("HC", "NON", "ON"), show.values = TRUE)
+
+ggplot(general, aes(
+        x = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON")),
+        y = vad,
+        fill = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON"))
+      )) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1, alpha = 0.4, size = 1.5) +
+  labs(
+    title = "VAD based on Eye status",
+    x = "Eye Status",
+    y = "Vessel area density (%)"
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange", "pink")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+vad_box<-ggplot(general, aes(
+        x = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON")),
+        y = vad,
+        fill = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON"))
+      )) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1, alpha = 0.4, size = 1.5) +
+  labs(
+    title = "VAD based on Eye status",
+    x = "Eye Status",
+    y = "Vessel area density (%)"
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange", "pink")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+#vld
+case_vld_lmm <- lme(vld_pct ~ eye_status2 + age + sex, data = general, random=~1|patient_id, na.action=na.omit)
+summary(case_vld_lmm)
+intervals(case_vld_lmm)
+multicollinearity(case_vld_lmm)
+
+emmeans_vld <-emmeans(case_vld_lmm, "eye_status2")
+emmeans(emmeans_vld, pairwise ~ "eye_status2", infer = T) 
+emmeans(emmeans_vld, pairwise ~ "eye_status2", infer = T) %>% plot(comparisons = T)
+tidy(emmeans_vld)
+plot_model(case_vld_lmm, type = 'emm', terms = c('eye_status2'), show.values = TRUE)
+
+
+ggplot(general, aes(
+        x = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON")),
+        y = vld_pct,
+        fill = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON"))
+      )) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1, alpha = 0.4, size = 1.5) +
+  labs(
+    title = "VLD based on Eye status",
+    x = "Eye Status",
+    y = "Vessel length density in pixels (mm-1)"
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange", "pink")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+vld_box<-ggplot(general, aes(
+        x = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON")),
+        y = vld_pct,
+        fill = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON"))
+      )) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1, alpha = 0.4, size = 1.5) +
+  labs(
+    title = "VLD based on Eye status",
+    x = "Eye Status",
+    y = "Vessel length density in pixels (mm-1)"
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange", "pink")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+#fd
+case_fd <- lme(fd ~ eye_status2 + age + sex, data = general, random=~1|patient_id, na.action=na.omit)
+summary(case_fd)
+intervals(case_fd)
+multicollinearity(case_fd)
+
+emmeans_fd <-emmeans(case_fd, "eye_status2")
+emmeans(emmeans_fd, pairwise ~ "eye_status2", infer = T)  
+emmeans(emmeans_fd, pairwise ~ "eye_status2", infer = T) %>% plot(comparisons = T)
+tidy(emmeans_fd)
+plot_model(case_fd, type = 'emm', terms = c('eye_status2'), show.values = TRUE)
+
+boxplot(fd ~ eye_status2,data=general, main="Fractal dimension in eyes", 
+   xlab="Eye status", ylab="Fractal dimension", names= c("HC", "NON", "ON"))
+
+ggplot(general, aes(
+        x = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON")),
+        y = fd,
+        fill = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON"))
+      )) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1, alpha = 0.4, size = 1.5) +
+  labs(
+    title = "FD based on Eye status",
+    x = "Eye Status",
+    y = "Fractal dimension"
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange", "pink")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+fd_box<-ggplot(general, aes(
+        x = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON")),
+        y = fd,
+        fill = factor(eye_status2, levels = c(0, 1, 2), labels = c("HC", "NON", "ON"))
+      )) +
+  geom_boxplot() +
+  geom_jitter(width = 0.1, alpha = 0.4, size = 1.5) +
+  labs(
+    title = "FD based on Eye status",
+    x = "Eye Status",
+    y = "Fractal dimension"
+  ) +
+  scale_fill_manual(values = c("skyblue", "orange", "pink")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+## ROC curves-averaging NON eyes
+
+```{r}
+
+# Average metrics for bilateral NON eyes
+bilat_non <- general %>%
+  filter(eye_status2 == "1") %>%
+  group_by(patient_id) %>%
+  filter(n() == 2) %>%  # only patients with both eyes
+  summarise(
+    vad_avg = mean(vad),
+    vld_avg = mean(vld_pct),
+    fd_avg = mean(fd),
+    gcipl_avg = mean(av_6mm),
+    rnfl_avg = mean(rnfl_mean_g),
+    age = first(age),
+    sex = first(sex),
+    eye_status2 = first(eye_status2)  # all NON
+  )
+
+# Average metrics for bilateral HCs
+bilat_hc <- general %>%
+  filter(eye_status2 == "0") %>%
+  group_by(patient_id) %>%
+  filter(n() == 2) %>%
+  summarise(
+    vad_avg = mean(vad),
+    vld_avg = mean(vld_pct),
+    fd_avg = mean(fd),
+    gcipl_avg = mean(av_6mm),
+    rnfl_avg = mean(rnfl_mean_g),
+    age = first(age),
+    sex = first(sex),
+    eye_status2 = first(eye_status2)  # all HC
+  )
+
+# Combine datasets
+roc_data <- bind_rows(bilat_non, bilat_hc)
+
+roc_data$eye_status2<-as.numeric(roc_data$eye_status2)
+
+roc_vad <- roc(roc_data$eye_status2, roc_data$vad_avg)
+plot(roc_vad, col="blue", lwd=2, main="ROC Curve: VAD (NON vs HC)")
+pROC::auc(roc_vad)
+cat("AUC VAD:", pROC::auc(roc_vad), "\n")
+#AUC= 0.6295
+
+#Adjust for age and sex
+#VAD
+model_vad_auc <- glm(eye_status2 ~ vad_avg + age + sex, 
+                 family = binomial, data = roc_data)
+
+# Get predicted probabilities
+roc_data$pred_vad <- predict(model_vad_auc, type = "response")
+
+# ROC and AUC
+roc_vad2 <- roc(roc_data$eye_status2, roc_data$pred_vad)
+plot(roc_vad2, col="blue", lwd=2, main="ROC Curve: VAD (adjusted)")
+pROC::auc(roc_vad2)
+ci.auc(roc_vad2)
+#AUC 0.6405
+
+#VLD
+model_vld_auc <- glm(eye_status2 ~ vld_avg + age + sex, 
+                 family = binomial, data = roc_data)
+# Get predicted probabilities
+roc_data$pred_vld <- predict(model_vld_auc, type = "response")
+
+# ROC and AUC
+roc_vld <- roc(roc_data$eye_status2, roc_data$pred_vld)
+plot(roc_vld, col="red", lwd=2, main="ROC Curve: VLD (adjusted)")
+pROC::auc(roc_vld)
+ci.auc(roc_vld)
+#AUC 0.6459
+
+#FD
+model_fd_auc <- glm(eye_status2 ~ fd_avg + age + sex, 
+                 family = binomial, data = roc_data)
+# Get predicted probabilities
+roc_data$pred_fd <- predict(model_fd_auc, type = "response")
+
+# ROC and AUC
+roc_fd <- roc(roc_data$eye_status2, roc_data$pred_fd)
+plot(roc_fd, col="green", lwd=2, main="ROC Curve: FD (adjusted)")
+pROC::auc(roc_fd)
+ci.auc(roc_fd)
+#AUC 0.6458
+
+#GCIPL
+model_gcipl_auc <- glm(eye_status2 ~ gcipl_avg + age + sex, 
+                 family = binomial, data = roc_data)
+# Get predicted probabilities
+roc_data$pred_gcipl <- predict(model_gcipl_auc, type = "response")
+
+# ROC and AUC
+roc_gcipl <- roc(roc_data$eye_status2, roc_data$pred_gcipl)
+plot(roc_gcipl, col="purple", lwd=2, main="ROC Curve:mGCIPL (adjusted)")
+pROC::auc(roc_gcipl)
+ci.auc(roc_gcipl)
+#AUC 0.6725
+
+#pRNFL
+model_rnfl_auc <- glm(eye_status2 ~ rnfl_avg + age + sex, 
+                 family = binomial, data = roc_data)
+# Get predicted probabilities
+roc_data$pred_rnfl <- predict(model_rnfl_auc, type = "response")
+
+# ROC and AUC
+roc_rnfl <- roc(roc_data$eye_status2, roc_data$pred_rnfl)
+plot(roc_rnfl, col="orange", lwd=2, main="ROC Curve:pRNFL (adjusted)")
+pROC::auc(roc_rnfl)
+ci.auc(roc_rnfl)
+#AUC 0.6258
+
+#Compare using Delong`s test
+roc.test(roc_gcipl, roc_vad, method="delong")
+roc.test(roc_rnfl, roc_vad, method="delong")
+roc.test(roc_rnfl, roc_gcipl, method="delong")
+roc.test(roc_vld, roc_gcipl, method="delong")
+roc.test(roc_fd, roc_gcipl, method="delong")
+roc.test(roc_fd, roc_rnfl, method="delong")
+roc.test(roc_vld, roc_rnfl, method="delong")
+
+```
+
+## EDSS- interactions with disease duration and ON
+
+```{r}
+
+#gcipl
+model_edss_gcipl<- lme(av_6mm ~ edss*disease_duration + oct_optic_neuritis + age + sex + prop_dmt , data = general_P, random=~1|patient_id, na.action=na.omit)
+summary(model_edss_gcipl)
+intervals(model_edss_gcipl)
+plot_model(model_edss_gcipl, type= "emm", terms= c("edss", "disease_duration"), labs(y= "GCIPL", x = "EDSS"))
+plot_model(model_edss_gcipl,
+  type = "emm",
+  terms = c("edss", "disease_duration"),
+  labs = list(y = "GCIPL", x = "EDSS"),
+  colors = c("#0072B2", "#E69F00", "#CC79A7"))
+
+edss_gcipl<-plot_model(model_edss_gcipl,
+  type = "emm",
+  terms = c("edss", "disease_duration"),
+  labs = list(y = "GCIPL", x = "EDSS"),
+  colors = c("#0072B2", "#E69F00", "#CC79A7"))
+
+multicollinearity(model_edss_gcipl)
+emtrends(model_edss_gcipl, pairwise ~ disease_duration, at =list(disease_duration = c(1, 7, 9, 10, 12, 14)), var = "edss", infer = T)
+
+model_edss_gcipl2<- lme(av_6mm ~ edss*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = general_P, random=~1|patient_id, na.action=na.omit)
+summary(model_edss_gcipl2)
+intervals(model_edss_gcipl2)
+plot_model(model_edss_gcipl2, type= "emm", terms= c("edss", "oct_optic_neuritis"))
+multicollinearity(model_edss_gcipl2)
+emtrends(model_edss_gcipl2, pairwise ~ oct_optic_neuritis, var = "edss", infer = T)
+
+anova(model_edss_gcipl, model_edss_gcipl2) 
+compare_models(model_edss_gcipl, model_edss_gcipl2) 
+plot(compare_performance(model_edss_gcipl, model_edss_gcipl2, rank = TRUE, verbose = FALSE))
+
+#prnfl
+model_edss_prnfl<- lme(rnfl_mean_g ~ edss*disease_duration + age + sex +  oct_optic_neuritis + prop_dmt, data = general_P, random=~1|patient_id, na.action=na.omit)
+summary(model_edss_prnfl) 
+intervals(model_edss_prnfl)
+multicollinearity(model_edss_prnfl)
+emtrends(model_edss_prnfl, pairwise ~ disease_duration, at =list(disease_duration = c(1, 7, 9, 10, 12, 14)), var = "edss", infer = T)
+plot_model(model_edss_prnfl, type= "emm", terms= c("edss", "disease_duration"))
+
+model_edss_prnfl2<- lme(rnfl_mean_g ~ edss*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = general_P, random=~1|patient_id, na.action=na.omit)
+summary(model_edss_prnfl2)
+intervals(model_edss_prnfl2)
+plot_model(model_edss_prnfl2, type= "emm", terms= c("edss", "oct_optic_neuritis"))
+multicollinearity(model_edss_prnfl2)
+emtrends(model_edss_prnfl2, pairwise ~ oct_optic_neuritis, var = "edss", infer = T)
+
+anova(model_edss_prnfl, model_edss_prnfl2) 
+compare_models(model_edss_prnfl, model_edss_prnfl2) 
+plot(compare_performance(model_edss_prnfl, model_edss_prnfl2, rank = TRUE, verbose = FALSE))
+
+
+#vad
+model_edss_vad<- lme(vad ~ edss*disease_duration + age + sex + oct_optic_neuritis + prop_dmt, data = general_P, random=~1|patient_id, na.action=na.omit)
+multicollinearity(model_edss_vad)
+summary(model_edss_vad)
+intervals(model_edss_vad)
+plot_model(model_edss_vad, type= "emm", terms= c("edss", "disease_duration"))
+plot_model(model_edss_vad,
+  type = "emm",
+  terms = c("edss", "disease_duration"),
+  labs = list(y = "vad", x = "EDSS"),
+  colors = c("#0072B2", "#E69F00", "#CC79A7"))
+
+edss_vad<-plot_model(model_edss_vad,
+  type = "emm",
+  terms = c("edss", "disease_duration"),
+  labs = list(y = "vad", x = "EDSS"),
+  colors = c("#0072B2", "#E69F00", "#CC79A7"))
+
+emtrends(model_edss_vad, pairwise ~ disease_duration, at =list(disease_duration = c(1, 7, 9, 10, 12, 14)), var = "edss", infer = T)
+
+ggplot(general_P, aes(x=edss, y=vad)) + geom_point() + geom_smooth(method="lm") + ggtitle("EDSS vs VAD")
+
+model_edss_vad2<- lme(vad ~ edss*oct_optic_neuritis + disease_duration + age + sex + prop_dmt, data = general_P, random=~1|patient_id, na.action=na.omit)
+multicollinearity(model_edss_vad2)
+summary(model_edss_vad2)
+intervals(model_edss_vad2)
+plot_model(model_edss_vad2, type= "emm", terms= c("edss", "oct_optic_neuritis"))
+emtrends(model_edss_vad2, pairwise ~ oct_optic_neuritis, var = "edss", infer = T)
+
+anova(model_edss_vad, model_edss_vad2) 
+compare_models(model_edss_vad, model_edss_vad2) 
+plot(compare_performance(model_edss_vad, model_edss_vad2, rank = TRUE, verbose = FALSE))
+
+#vld
+model_edss_vld<- lme(vld_pct ~ edss*disease_duration + age + sex + oct_optic_neuritis + prop_dmt, data = general_P, random=~1|patient_id, na.action=na.omit)
+summary(model_edss_vld)
+intervals(model_edss_vld)
+multicollinearity(model_edss_vld)
+
+plot_model(model_edss_vld, type= "emm", terms= c("edss", "disease_duration"))
+emtrends(model_edss_vld, pairwise ~ disease_duration, at =list(disease_duration = c(1, 7, 9, 12, 14)), var = "edss", infer = T)
+
+model_edss_vld2<- lme(vld_pct ~ edss*oct_optic_neuritis + disease_duration + age + sex + prop_dmt, data = general_P, random=~1|patient_id, na.action=na.omit)
+multicollinearity(model_edss_vld2)
+summary(model_edss_vld2)
+intervals(model_edss_vld2)
+plot_model(model_edss_vld2, type= "emm", terms= c("edss", "oct_optic_neuritis"))
+emtrends(model_edss_vld2, pairwise ~ oct_optic_neuritis, var = "edss", infer = T)
+
+anova(model_edss_vld, model_edss_vld2) 
+compare_models(model_edss_vld, model_edss_vld2) 
+plot(compare_performance(model_edss_vld, model_edss_vld2, rank = TRUE, verbose = FALSE))
+
+#FD
+model_edss_fd<- lme(fd ~ edss*disease_duration + age + sex + oct_optic_neuritis +  prop_dmt, data = general_P, random=~1|patient_id, na.action=na.omit)
+summary(model_edss_fd)
+intervals(model_edss_fd)
+multicollinearity(model_edss_fd)
+
+plot_model(model_edss_fd, type= "emm", terms= c("edss", "disease_duration"))
+emtrends(model_edss_fd, pairwise ~ disease_duration, at =list(disease_duration = c(1, 5, 6, 7, 12, 14)), var = "edss", infer = T)
+
+model_edss_fd2<- lme(fd ~ edss*oct_optic_neuritis + disease_duration + age + sex + prop_dmt, data = general_P, random=~1|patient_id, na.action=na.omit)
+summary(model_edss_fd2) 
+intervals(model_edss_fd2)
+multicollinearity(model_edss_fd2)
+
+plot_model(model_edss_fd2, type= "emm", terms= c("edss", "oct_optic_neuritis"))
+emtrends(model_edss_fd2, pairwise ~ oct_optic_neuritis, var = "edss", infer = T)
+
+```
+
+## Sensitivity analysis- % on HE-DMT
+
+```{r}
+
+model_edss_vad_het<- lme(vad ~ edss*disease_duration + age + sex + oct_optic_neuritis + het_prop_dmt, data = general_P, random=~1|patient_id, na.action=na.omit)
+multicollinearity(model_edss_vad_het)
+summary(model_edss_vad_het)
+intervals(model_edss_vad_het)
+plot_model(model_edss_vad_het, type= "emm", terms= c("edss", "disease_duration"))
+emtrends(model_edss_vad_het, pairwise ~ disease_duration, at =list(disease_duration = c(1, 7, 9, 10, 12, 14)), var = "edss", infer = T)
+
+model_edss_gcipl_het<- lme(av_6mm ~ edss*disease_duration + oct_optic_neuritis + age + sex + het_prop_dmt , data = general_P, random=~1|patient_id, na.action=na.omit)
+summary(model_edss_gcipl_het)
+intervals(model_edss_gcipl_het)
+plot_model(model_edss_gcipl_het, type= "emm", terms= c("edss", "disease_duration"), labs(y= "GCIPL", x = "EDSS"))
+multicollinearity(model_edss_gcipl_het)
+emtrends(model_edss_gcipl_het, pairwise ~ disease_duration, at =list(disease_duration = c(1, 7, 9, 10, 12, 14)), var = "edss", infer = T)
+
+model_edss_prnfl_het<- lme(rnfl_mean_g ~ edss*disease_duration + age + sex +  oct_optic_neuritis + het_prop_dmt, data = general_P, random=~1|patient_id, na.action=na.omit)
+summary(model_edss_prnfl_het) 
+intervals(model_edss_prnfl_het)
+multicollinearity(model_edss_prnfl_het)
+emtrends(model_edss_prnfl_het, pairwise ~ disease_duration, at =list(disease_duration = c(1, 7, 9, 10, 12, 14)), var = "edss", infer = T)
+plot_model(model_edss_prnfl_het, type= "emm", terms= c("edss", "disease_duration"))
+
+```
+
+## Visual outcomes- summary
+
+```{r}
+
+
+general%>%filter(is.na(logmar_min))%>%filter(case=="P")
+
+#Logmar
+summary(general_P$logmar_min, na.rm = T)
+sd(general_P$logmar_min, na.rm = T)
+hist(general_P$logmar_min, col = "firebrick3", breaks=50)
+
+#Sloan 2.5%
+
+summary(general_P$sloan_cont_2_5, na.rm = T)
+sd(general_P$sloan_cont_2_5, na.rm = T)
+hist(general_P$sloan_cont_2_5, col = "firebrick3", breaks=50)
+
+#Sloan 1.25%
+
+summary(general_P$sloan_cont_1_25, na.rm = T)
+sd(general_P$sloan_cont_1_25, na.rm = T)
+hist(general_P$sloan_cont_1_25, col = "firebrick3", breaks=50)
+
+#Ishihara
+
+summary(general_P$lcva_ishihara_plates, na.rm = T)
+sd(general_P$lcva_ishihara_plates, na.rm = T)
+hist(general_P$lcva_ishihara_plates, col = "firebrick3", breaks=50)
+
+
+#NON eyes
+
+#Logmar
+summary(general_non$logmar_min, na.rm = T)
+sd(general_non$logmar_min, na.rm = T)
+hist(general_non$logmar_min, col = "firebrick3", breaks=50)
+
+#Sloan 2.5%
+
+summary(general_non$sloan_cont_2_5, na.rm = T)
+sd(general_non$sloan_cont_2_5, na.rm = T)
+hist(general_non$sloan_cont_2_5, col = "firebrick3", breaks=50)
+
+#Sloan 1.25%
+
+summary(general_non$sloan_cont_1_25, na.rm = T)
+sd(general_non$sloan_cont_1_25, na.rm = T)
+hist(general_non$sloan_cont_1_25, col = "firebrick3", breaks=50)
+
+#Ishihara
+
+summary(general_non$lcva_ishihara_plates, na.rm = T)
+sd(general_non$lcva_ishihara_plates, na.rm = T)
+hist(general_non$lcva_ishihara_plates, col = "firebrick3", breaks=50)
+
+#ON eyes
+
+#Logmar
+summary(general_on$logmar_min, na.rm = T)
+sd(general_on$logmar_min, na.rm = T)
+hist(general_on$logmar_min, col = "firebrick3", breaks=50)
+
+#Sloan 2.5%
+
+summary(general_on$sloan_cont_2_5, na.rm = T)
+sd(general_on$sloan_cont_2_5, na.rm = T)
+hist(general_on$sloan_cont_2_5, col = "firebrick3", breaks=50)
+
+#Sloan 1.25%
+
+summary(general_on$sloan_cont_1_25, na.rm = T)
+sd(general_on$sloan_cont_1_25, na.rm = T)
+hist(general_on$sloan_cont_1_25, col = "firebrick3", breaks=50)
+
+#Ishihara
+
+summary(general_on$lcva_ishihara_plates, na.rm = T)
+sd(general_on$lcva_ishihara_plates, na.rm = T)
+hist(general_on$lcva_ishihara_plates, col = "firebrick3", breaks=50)
+
+
+```
+
+## Visual outcomes- Logmar models 
+
+```{r}
+
+logmar_gcipl2 <-  lme(logmar_min~ av_6mm*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))} , random=~1|patient_id, na.action=na.omit)
+multicollinearity(logmar_gcipl2)
+summary(logmar_gcipl2)
+intervals(logmar_gcipl2)
+
+plot_model(logmar_gcipl2, type= "emm", terms= c("av_6mm", "oct_optic_neuritis"), show.data = T)
+logmar_gcipl<-plot_model(logmar_gcipl2, type= "emm", terms= c("av_6mm", "oct_optic_neuritis"), show.data = T)
+emtrends(logmar_gcipl2, pairwise ~ oct_optic_neuritis, var = "av_6mm", infer = T)
+
+logmar_gcipl3 <-  lme(logmar_min ~ av_6mm*disease_duration + oct_optic_neuritis + sex + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(logmar_gcipl3)
+intervals(logmar_gcipl3)
+check_model(logmar_gcipl3)
+multicollinearity(logmar_gcipl3)
+
+plot_model(logmar_gcipl3, type= "emm", terms= c("av_6mm", "disease_duration"))
+emtrends(logmar_gcipl3, pairwise ~ disease_duration, at =list(disease_duration = c(1, 7, 9, 10, 12, 14)), var = "av_6mm", infer = T)
+
+anova(logmar_gcipl2, logmar_gcipl3) 
+compare_models(logmar_gcipl2, logmar_gcipl3) 
+plot(compare_performance(logmar_gcipl2, logmar_gcipl3, rank = TRUE, verbose = FALSE))
+
+logmar_rnfl2 <-  lme(logmar_min ~ rnfl_mean_g*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+multicollinearity(logmar_rnfl2)
+summary(logmar_rnfl2) 
+intervals(logmar_rnfl2)
+
+plot_model(logmar_rnfl2, type= "emm", terms= c("rnfl_mean_g", "oct_optic_neuritis"))
+logmar_rnfl<-plot_model(logmar_rnfl2, type= "emm", terms= c("rnfl_mean_g", "oct_optic_neuritis"))
+emtrends(logmar_rnfl2, pairwise ~ oct_optic_neuritis, var = "rnfl_mean_g", infer = T)
+
+logmar_rnfl3 <-  lme(logmar_min ~ rnfl_mean_g*disease_duration + age + sex  + oct_optic_neuritis + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+multicollinearity(logmar_rnfl3)
+summary(logmar_rnfl3) 
+intervals(logmar_rnfl3)
+
+plot_model(logmar_rnfl3, type= "emm", terms= c("rnfl_mean_g", "disease_duration"))
+logmar_rnfl<-plot_model(logmar_rnfl3, type= "emm", terms= c("rnfl_mean_g", "disease_duration"))
+emtrends(logmar_rnfl3, pairwise ~ disease_duration, var = "rnfl_mean_g", infer = T)
+
+logmar_vad2 <-  lme(logmar_min ~ vad*oct_optic_neuritis + sex  + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(logmar_vad2)
+intervals(logmar_vad2)
+check_model(logmar_vad2)
+multicollinearity(logmar_vad2)
+
+plot_model(logmar_vad2, type= "emm", terms= c("vad", "oct_optic_neuritis"), show.data=T)
+logmar_vad<-plot_model(logmar_vad2, type= "emm", terms= c("vad", "oct_optic_neuritis"), show.data=T)
+emtrends(logmar_vad2, pairwise ~ oct_optic_neuritis, var = "vad", infer = T)
+
+logmar_vad3 <-  lme(logmar_min ~ vad*disease_duration + oct_optic_neuritis + sex + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(logmar_vad3)
+intervals(logmar_vad3)
+check_model(logmar_vad3)
+multicollinearity(logmar_vad3)
+
+plot_model(logmar_vad3, type= "emm", terms= c("vad", "disease_duration"))
+emtrends(logmar_vad3, pairwise ~ disease_duration, at =list(disease_duration = c(1, 7, 9, 10, 12, 14)), var = "vad", infer = T)
+
+anova(logmar_vad2, logmar_vad3) 
+compare_models(logmar_vad2, logmar_vad3) 
+plot(compare_performance(logmar_vad2, logmar_vad3, rank = TRUE, verbose = FALSE))
+
+logmar_vld2 <-  lme(logmar_min ~ vld_pct*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(logmar_vld2)
+intervals(logmar_vld2)
+multicollinearity(logmar_vld2)
+
+plot_model(logmar_vld2, type= "emm", terms= c("vld_pct", "oct_optic_neuritis"))
+emtrends(logmar_vld2, pairwise ~ oct_optic_neuritis, var = "vld_pct", infer = T)
+
+logmar_vld3 <-  lme(logmar_min ~ vld_pct*disease_duration + oct_optic_neuritis age + sex  + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(logmar_vld3)
+intervals(logmar_vld3)
+multicollinearity(logmar_vld3)
+
+plot_model(logmar_vld3, type= "emm", terms= c("vld_pct", "disease_duration"))
+emtrends(logmar_vld3, pairwise ~ oct_optic_neuritis, var = "vld_pct", infer = T)
+
+logmar_fd2 <-  lme(logmar_min ~ fd*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(logmar_fd2)
+intervals(logmar_fd2)
+multicollinearity(logmar_fd2)
+
+plot_model(logmar_fd2, type= "emm", terms= c("fd", "oct_optic_neuritis"), show.data = T)
+emtrends(logmar_fd2, pairwise ~ oct_optic_neuritis, var = "fd", infer = T)
+
+logmar_fd3 <-  lme(logmar_min ~ fd*disease_duration + oct_optic_neuritis age + sex  + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(logmar_fd3)
+intervals(logmar_fd3)
+multicollinearity(logmar_fd3)
+
+plot_model(logmar_fd3, type= "emm", terms= c("fd", "disease_duration"))
+emtrends(logmar_fd3, pairwise ~ oct_optic_neuritis, var = "fd", infer = T)
+
+models.logmar2 <- list(logmar_gcipl2, logmar_rnfl2, logmar_vad2, logmar_vld2, logmar_fd2)
+models.logmar2 <- list(logmar_gcipl2, logmar_rnfl2,logmar_vad2, logmar_vld2, logmar_fd2) %>% 
+  set_names('logmar_gcipl', 'logmar_rnfl', 'logmar_vad', 'logmar_vld', 'logmar_fd')
+
+test_performance(models.logmar2)
+comparison_logmar<-compare_performance(models.logmar2)
+print(comparison_logmar)
+compare_performance(models.logmar2) %>% as_tibble() %>% arrange(AIC)
+compare_performance(models.logmar2) %>% as_tibble() %>% arrange(BIC)
+compare_performance(models.logmar2) %>% as_tibble() %>% arrange(desc(R2_marginal))
+
+compare_performance(models.logmar2) %>% plot
+test_performance(logmar_vld2, logmar_vad2, logmar_gcipl2)
+#test_vuong(models.logmar2)
+general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))
+
+```
+
+## Sensitivity analysis- LogMAR and HE-DMT
+
+```{r}
+
+logmar_vad_het <-  lme(logmar_min ~ vad*oct_optic_neuritis + disease_duration + sex + het_prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(logmar_vad_het)
+intervals(logmar_vad_het)
+check_model(logmar_vad_het)
+multicollinearity(logmar_vad_het)
+
+logmar_gcipl_het <-  lme(logmar_min ~ av_6mm*oct_optic_neuritis + disease_duration + sex + het_prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(logmar_gcipl_het)
+intervals(logmar_gcipl_het)
+check_model(logmar_gcipl_het)
+multicollinearity(logmar_gcipl_het)
+
+logmar_rnfl_het <-  lme(logmar_min ~ rnfl_mean_g*oct_optic_neuritis + age + sex  + disease_duration + het_prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+multicollinearity(logmar_rnfl_het)
+summary(logmar_rnfl_het) 
+intervals(logmar_rnfl_het)
+
+```
+
+## Visual outcomes- Sloan 2.5% models
+
+```{r}
+
+#gcipl
+sloan2.5_gcipl2 <-  lme(sloan_cont_2_5 ~  av_6mm*oct_optic_neuritis + sex + age + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(sloan2.5_gcipl2)
+intervals(sloan2.5_gcipl2)
+multicollinearity(sloan2.5_gcipl2)
+check_model(sloan2.5_gcipl2)
+
+plot_model(sloan2.5_gcipl2, type = 'emm', terms = c('av_6mm', 'oct_optic_neuritis'), show.data = T)
+sloan_gcipl<-plot_model(sloan2.5_gcipl2, type = 'emm', terms = c('av_6mm', 'oct_optic_neuritis'), show.data = T)
+emtrends(sloan2.5_gcipl2, pairwise ~ oct_optic_neuritis, var = "av_6mm", infer = T)
+emtrends(sloan2.5_gcipl2, pairwise ~ oct_optic_neuritis, var = "av_6mm", infer = T) %>% plot()
+
+#prnfl
+sloan2.5_rnfl2 <-  lme(sloan_cont_2_5 ~ rnfl_mean_g*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+multicollinearity(sloan2.5_rnfl2)
+summary(sloan2.5_rnfl2)
+intervals(sloan2.5_rnfl2)
+
+plot_model(sloan2.5_rnfl2, type= "emm", terms= c("rnfl_mean_g", "oct_optic_neuritis"))
+emtrends(sloan2.5_rnfl2, pairwise ~ oct_optic_neuritis, var = "rnfl_mean_g", infer = T)
+
+general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g)) %>% select(oct_optic_neuritis, rnfl_mean_g)%>%ggpairs()
+
+#vad
+sloan2.5_vad2 <-lme(sloan_cont_2_5 ~ vad*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(sloan2.5_vad2)
+intervals(sloan2.5_vad2)
+multicollinearity(sloan2.5_vad2)
+check_model(sloan2.5_vad2)
+
+plot_model(sloan2.5_vad2, type = 'emm', terms = c('vad', 'oct_optic_neuritis'), show.data = T)
+sloan_vad<-plot_model(sloan2.5_vad2, type = 'emm', terms = c('vad', 'oct_optic_neuritis'), show.data = T)
+emtrends(sloan2.5_vad2, pairwise ~ oct_optic_neuritis, var = "vad", infer = T)
+emtrends(sloan2.5_vad2, pairwise ~ oct_optic_neuritis, var = "vad", infer = T) %>% plot()
+
+#vld
+sloan2.5_vld2 <-lme(sloan_cont_2_5 ~ vld_pct*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(sloan2.5_vld2)
+intervals(sloan2.5_vld2)
+multicollinearity(sloan2.5_vld2)
+check_model(sloan2.5_vld2)
+
+plot_model(sloan2.5_vld2, type = 'emm', terms = c('vld_pct', 'oct_optic_neuritis'))
+emtrends(sloan2.5_vld2, pairwise ~ oct_optic_neuritis, var = "vld_pct", infer = T)
+emtrends(sloan2.5_vld2, pairwise ~ oct_optic_neuritis, var = "vld_pct", infer = T) %>% plot()
+
+#fd
+
+sloan2.5_fd2 <-lme(sloan_cont_2_5 ~ fd*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(sloan2.5_fd2)
+intervals(sloan2.5_fd2)
+multicollinearity(sloan2.5_fd2)
+check_model(sloan2.5_fd2)
+
+plot_model(sloan2.5_fd2, type = 'emm', terms = c('fd', 'oct_optic_neuritis'), show.data=T)
+emtrends(sloan2.5_fd2, pairwise ~ oct_optic_neuritis, var = "fd", infer = T)
+emtrends(sloan2.5_fd2, pairwise ~ oct_optic_neuritis, var = "fd", infer = T) %>% plot()
+
+
+models.sloan2.5_2 <- list(sloan2.5_gcipl2, sloan2.5_rnfl2, sloan2.5_vad2, sloan2.5_vld2, sloan2.5_fd2) %>% 
+  set_names('sloan2.5_gcipl', 'sloan2.5_rnfl', 'sloan2.5_vad', 'sloan2.5_vld' ,'sloan2.5_fd')
+
+test_performance(models.sloan2.5_2)
+compare_performance(models.sloan2.5_2) %>% as_tibble() %>% arrange(AIC)
+compare_performance(models.sloan2.5_2) %>% plot
+# test_vuong(models.logmar2)
+general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))
+
+aictab(cand.set = models.sloan2.5_2)
+
+
+models.sloan2.5_2 <- list(sloan2.5_gcipl2, sloan2.5_rnfl2, sloan2.5_vad2, sloan2.5_vld2, sloan2.5_fd2) 
+model.names.sloan2.5_2 <-c('gcipl', 'rnfl', 'vad', 'vld', 'fd')
+aictab(cand.set = models.sloan2.5_2, model.names.sloan2.5_2)
+
+
+```
+
+## Sensitivity analysis- Sloan 2.5% and HE-DMT
+
+```{r}
+
+sloan2.5_vad_het <-lme(sloan_cont_2_5 ~ vad*oct_optic_neuritis + age + sex + disease_duration + het_prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(sloan2.5_vad_het)
+intervals(sloan2.5_vad_het)
+multicollinearity(sloan2.5_vad_het)
+check_model(sloan2.5_vad_het)
+
+sloan2.5_gcipl_het <-  lme(sloan_cont_2_5 ~  av_6mm*oct_optic_neuritis + sex + age + disease_duration + het_prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(sloan2.5_gcipl_het)
+intervals(sloan2.5_gcipl_het)
+multicollinearity(sloan2.5_gcipl_het)
+check_model(sloan2.5_gcipl_het)
+
+sloan2.5_rnfl_het <-  lme(sloan_cont_2_5 ~ rnfl_mean_g*oct_optic_neuritis + age + sex + disease_duration + het_prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+multicollinearity(sloan2.5_rnfl_het)
+summary(sloan2.5_rnfl_het)
+intervals(sloan2.5_rnfl_het)
+
+```
+
+## Visual outcomes- Ishihara colour models 
+
+```{r}
+
+#gcipl
+ishi_gcipl2 <-  lme(lcva_ishihara_plates ~ av_6mm*oct_optic_neuritis+ sex + age + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(ishi_gcipl2)
+intervals(ishi_gcipl2)
+multicollinearity(ishi_gcipl2)
+check_model(ishi_gcipl2)
+
+plot_model(ishi_gcipl2, type = 'emm', terms = c('av_6mm', 'oct_optic_neuritis'), show.data=T)
+ishihara_gcipl<-plot_model(ishi_gcipl2, type = 'emm', terms = c('av_6mm', 'oct_optic_neuritis'), show.data=T)
+emtrends(ishi_gcipl2, pairwise ~ oct_optic_neuritis, var = "av_6mm", infer = T)
+emtrends(ishi_gcipl2, pairwise ~ oct_optic_neuritis, var = "av_6mm", infer = T) %>% plot()
+
+#prnfl
+ishi_rnfl2 <-  lme(lcva_ishihara_plates ~ rnfl_mean_g*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+multicollinearity(ishi_rnfl2)
+summary(ishi_rnfl2)
+intervals(ishi_rnfl2)
+
+plot_model(ishi_rnfl2, type= "emm", terms= c("rnfl_mean_g", "oct_optic_neuritis"))
+emtrends(ishi_rnfl2, pairwise ~ oct_optic_neuritis, var = "rnfl_mean_g", infer = T)
+emtrends(ishi_rnfl2, pairwise ~ oct_optic_neuritis, var = "rnfl_mean_g", infer = T) %>% plot()
+
+#vad
+ishi_vad2 <-lme(lcva_ishihara_plates ~ vad*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(ishi_vad2)
+intervals(ishi_vad2)
+multicollinearity(ishi_vad2)
+check_model(ishi_vad2)
+
+plot_model(ishi_vad2, type = 'emm', terms = c('vad', 'oct_optic_neuritis'), show.data=T)
+ishihara_vad<-plot_model(ishi_vad2, type = 'emm', terms = c('vad', 'oct_optic_neuritis'), show.data=T)
+emtrends(ishi_vad2, pairwise ~ oct_optic_neuritis, var = "vad", infer = T)
+emtrends(ishi_vad2, pairwise ~ oct_optic_neuritis, var = "vad", infer = T) %>% plot()
+
+#vld
+ishi_vld2 <-lme(lcva_ishihara_plates ~ vld_pct*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(ishi_vld2)
+intervals(ishi_vld2)
+multicollinearity(ishi_vld2)
+check_model(ishi_vld2)
+
+plot_model(ishi_vld2, type = 'emm', terms = c('vld_pct', 'oct_optic_neuritis'))
+emtrends(ishi_vld2, pairwise ~ oct_optic_neuritis, var = "vld_pct", infer = T)
+emtrends(ishi_vld2, pairwise ~ oct_optic_neuritis, var = "vld_pct", infer = T) %>% plot()
+
+#fd
+
+ishi_fd2 <-lme(lcva_ishihara_plates ~ fd*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(ishi_fd2)
+intervals(ishi_fd2)
+multicollinearity(ishi_fd2)
+check_model(ishi_fd2)
+
+plot_model(ishi_fd2, type = 'emm', terms = c('fd', 'oct_optic_neuritis'), show.data = T)
+emtrends(ishi_fd2, pairwise ~ oct_optic_neuritis, var = "fd", infer = T)
+emtrends(ishi_fd2, pairwise ~ oct_optic_neuritis, var = "fd", infer = T) %>% plot()
+
+models.ishi2 <- list(ishi_gcipl2, ishi_rnfl2, ishi_vad2, ishi_vld2, ishi_fd2) %>% set_names('ishi_gcipl', 'ishi_rnfl', 'ishi_vad', 'ishi_vld', 'ishi_fd')
+
+test_performance(models.ishi2)
+compare_performance(models.ishi2) %>% as_tibble() %>% arrange(AIC)
+compare_performance(models.ishi2) %>% plot
+
+```
+
+## Sensitivity analysis- Ishihara and HE-DMT
+
+```{r}
+
+
+ishi_vad_het <-lme(lcva_ishihara_plates ~ vad*oct_optic_neuritis + age + sex + disease_duration + het_prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(ishi_vad_het)
+intervals(ishi_vad_het)
+multicollinearity(ishi_vad_het)
+check_model(ishi_vad_het)
+
+AICc(ishi_vad2)
+AICc(ishi_vad_het)
+
+ishi_gcipl_het <-  lme(lcva_ishihara_plates ~ av_6mm*oct_optic_neuritis+ sex + age + disease_duration + het_prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+summary(ishi_gcipl_het)
+intervals(ishi_gcipl_het)
+multicollinearity(ishi_gcipl_het)
+check_model(ishi_gcipl_het)
+
+AICc(ishi_gcipl2)
+AICc(ishi_gcipl_het)
+
+ishi_rnfl_het <-  lme(lcva_ishihara_plates ~ rnfl_mean_g*oct_optic_neuritis + age + sex + disease_duration + het_prop_dmt, data = {general_P %>% filter(!is.na(m_tort)) %>% filter(!is.na(rnfl_mean_g))}, random=~1|patient_id, na.action=na.omit)
+multicollinearity(ishi_rnfl_het)
+summary(ishi_rnfl_het)
+intervals(ishi_rnfl_het)
+
+AICc(ishi_rnfl2)
+AICc(ishi_rnfl_het)
+
+```
+
+## Compare NON eye pairs- difference in colour vision score
+
+```{r}
+
+#Screen out bilateral NON eyes as a separate Df
+
+bilateral_non <- general_P %>%
+  group_by(patient_id) %>%                  # replace with your actual subject ID column
+  filter(all(oct_optic_neuritis == "no")) %>%  # keeps only subjects where all eyes are non-ON
+  ungroup()
+
+bilateral_non%>%distinct(patient_id)
+#238 patients
+
+#t-test
+ggwithinstats(
+  data = bilateral_non,
+  x = eye,
+  y = lcva_ishihara_plates
+)
+
+#Non parametric test
+ggwithinstats(
+  data = bilateral_non,
+  x = eye,
+  y = lcva_ishihara_plates,
+  type = "nonparametric", ## type of statistical test
+  xlab = "Eye", ## label for the x-axis
+  ylab = "Ishihara colour vision plates", ## label for the y-axis
+  package = "yarrr", ## package from which color palette is to be taken
+  palette = "info2", ## choosing a different color palette
+  title = "Comparison of Left and Right eyes colour vision",
+) + ## modifying the plot further
+  ggplot2::scale_y_continuous(
+    limits = c(0, 50),
+    breaks = seq(from = 0, to = 50, by = 10)
+  )
+
+
+```
