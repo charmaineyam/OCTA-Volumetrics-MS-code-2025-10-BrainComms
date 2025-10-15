@@ -1,0 +1,1567 @@
+---
+title: "Untitled"
+format: html
+editor: visual
+---
+
+## Load packages
+
+```{r}
+
+rm(list = ls())
+pacman::p_load(tidyverse,
+               janitor,
+               rio,
+               here,
+               gt,
+               GGally,
+               gtExtras,
+               gtsummary,
+               tidymodels,
+               readxl,
+               dlookr,
+               DataExplorer,
+               arsenal,
+               ggstatsplot,
+               nlme,
+               pROC, 
+               emmeans,
+               sjPlot,
+               AICcmodavg,
+               lme4,
+               naniar,
+               skimr,
+               lmerTest,
+               easystats)
+
+```
+
+## MRI summary- main brain volumes
+
+```{r}
+
+
+#Lesion volumes
+summary(oct_octa_clin_mri_g$lesion_volume, na.rm = T)
+sd(oct_octa_clin_mri_g$lesion_volume, na.rm = T)
+hist(oct_octa_clin_mri_g$lesion_volume, col = "firebrick3", breaks=50)
+
+#highly skewed
+
+
+#White matter
+summary(oct_octa_clin_mri_g$wm, na.rm = T)
+sd(oct_octa_clin_mri_g$wm, na.rm = T)
+hist(oct_octa_clin_mri_g$wm, col = "firebrick3", breaks=50)
+
+summary(oct_octa_clin_mri_g$wm_adjusted, na.rm = T)
+sd(oct_octa_clin_mri_g$wm_adjusted, na.rm = T)
+hist(oct_octa_clin_mri_g$wm_adjusted, col = "firebrick3", breaks=50)
+
+#DGM
+summary(oct_octa_clin_mri_g$dgm, na.rm = T)
+sd(oct_octa_clin_mri_g$dgm, na.rm = T)
+hist(oct_octa_clin_mri_g$dgm, col = "firebrick3", breaks=50)
+
+summary(oct_octa_clin_mri_g$dgm_adjusted, na.rm = T)
+sd(oct_octa_clin_mri_g$dgm_adjusted, na.rm = T)
+hist(oct_octa_clin_mri_g$dgm_adjusted, col = "firebrick3", breaks=50)
+
+#Cortical grey
+summary(oct_octa_clin_mri_g$cortical_grey, na.rm = T)
+sd(oct_octa_clin_mri_g$cortical_grey, na.rm = T)
+hist(oct_octa_clin_mri_g$cortical_grey, col = "firebrick3", breaks=50)
+
+summary(oct_octa_clin_mri_g$cgm_adjusted, na.rm = T)
+sd(oct_octa_clin_mri_g$cgm_adjusted, na.rm = T)
+hist(oct_octa_clin_mri_g$cgm_adjusted, col = "firebrick3", breaks=50)
+
+
+#Total grey
+summary(oct_octa_clin_mri_g$gm, na.rm = T)
+sd(oct_octa_clin_mri_g$gm, na.rm = T)
+hist(oct_octa_clin_mri_g$gm, col = "firebrick3", breaks=50)
+
+summary(oct_octa_clin_mri_g$gm_adjusted, na.rm = T)
+sd(oct_octa_clin_mri_g$gm_adjusted, na.rm = T)
+hist(oct_octa_clin_mri_g$gm_adjusted, col = "firebrick3", breaks=50)
+
+#Lesion number
+class(oct_octa_clin_mri_g$lesion_no)
+
+summary(oct_octa_clin_mri_g$lesion_no, na.rm = T)
+sd(oct_octa_clin_mri_g$lesion_no, na.rm = T)
+hist(oct_octa_clin_mri_g$lesion_no, col = "firebrick3", breaks=50)
+
+#TIV
+summary(oct_octa_clin_mri_g$tiv, na.rm = T)
+sd(oct_octa_clin_mri_g$tiv, na.rm = T)
+hist(oct_octa_clin_mri_g$tiv, col = "firebrick3", breaks=50)
+
+#Thalamus
+summary(oct_octa_clin_mri_g$thalamus, na.rm = T)
+sd(oct_octa_clin_mri_g$thalamus, na.rm = T)
+hist(oct_octa_clin_mri_g$thalamus, col = "firebrick3", breaks=50)
+
+#Optic chiasm
+summary(oct_octa_clin_mri_g$optic_chiasm, na.rm = T)
+sd(oct_octa_clin_mri_g$optic_chiasm, na.rm = T)
+hist(oct_octa_clin_mri_g$optic_chiasm, col = "firebrick3", breaks=50)
+
+#Occipital pole
+
+summary(oct_octa_clin_mri_g$occipital_pole, na.rm = T)
+sd(oct_octa_clin_mri_g$occipital_pole, na.rm = T)
+hist(oct_octa_clin_mri_g$occipital_pole, col = "firebrick3", breaks=50)
+
+#Calcarine cortex
+
+summary(oct_octa_clin_mri_g$calcarine_cortex, na.rm = T)
+sd(oct_octa_clin_mri_g$calcarine_cortex, na.rm = T)
+hist(oct_octa_clin_mri_g$calcarine_cortex, col = "firebrick3", breaks=50)
+
+#Superior occipital gyrus
+
+summary(oct_octa_clin_mri_g$superior_occipital_gyrus, na.rm = T)
+sd(oct_octa_clin_mri_g$superior_occipital_gyrus, na.rm = T)
+hist(oct_octa_clin_mri_g$superior_occipital_gyrus, col = "firebrick3", breaks=50)
+
+#Inferior occipital gyrus
+
+summary(oct_octa_clin_mri_g$inferior_occipital_gyrus, na.rm = T)
+sd(oct_octa_clin_mri_g$inferior_occipital_gyrus, na.rm = T)
+hist(oct_octa_clin_mri_g$inferior_occipital_gyrus, col = "firebrick3", breaks=50)
+
+#Middle occipital gyrus
+
+summary(oct_octa_clin_mri_g$middle_occipital_gyrus, na.rm = T)
+sd(oct_octa_clin_mri_g$middle_occipital_gyrus, na.rm = T)
+hist(oct_octa_clin_mri_g$middle_occipital_gyrus, col = "firebrick3", breaks=50)
+
+#Cuneus
+
+summary(oct_octa_clin_mri_g$cuneus, na.rm = T)
+sd(oct_octa_clin_mri_g$cuneus, na.rm = T)
+hist(oct_octa_clin_mri_g$cuneus, col = "firebrick3", breaks=50)
+
+#Occipital fusiform gyrus
+
+summary(oct_octa_clin_mri_g$OFuG, na.rm = T)
+sd(oct_octa_clin_mri_g$OFuG, na.rm = T)
+hist(oct_octa_clin_mri_g$OFuG, col = "firebrick3", breaks=50)
+
+#Lingual gyrus
+summary(oct_octa_clin_mri_g$lingual_gyrus, na.rm = T)
+sd(oct_octa_clin_mri_g$lingual_gyrus, na.rm = T)
+hist(oct_octa_clin_mri_g$lingual_gyrus, col = "firebrick3", breaks=50)
+
+#Superior temporal gyrus
+
+summary(oct_octa_clin_mri_g$superior_temporal_gyrus, na.rm = T)
+sd(oct_octa_clin_mri_g$superior_temporal_gyrus, na.rm = T)
+hist(oct_octa_clin_mri_g$superior_temporal_gyrus, col = "firebrick3", breaks=50)
+
+#Inferior temporal gyrus
+
+summary(oct_octa_clin_mri_g$inferior_temporal_gyrus, na.rm = T)
+sd(oct_octa_clin_mri_g$inferior_temporal_gyrus, na.rm = T)
+hist(oct_octa_clin_mri_g$inferior_temporal_gyrus, col = "firebrick3", breaks=50)
+
+#Superior_parietal_lobe
+
+summary(oct_octa_clin_mri_g$superior_parietal_lobe, na.rm = T)
+sd(oct_octa_clin_mri_g$superior_parietal_lobe, na.rm = T)
+hist(oct_octa_clin_mri_g$superior_parietal_lobe, col = "firebrick3", breaks=50)
+
+#Postcentral gyrus
+summary(oct_octa_clin_mri_g$postcentral_gyrus, na.rm = T)
+sd(oct_octa_clin_mri_g$postcentral_gyrus, na.rm = T)
+hist(oct_octa_clin_mri_g$postcentral_gyrus, col = "firebrick3", breaks=50)
+
+#Frontal pole
+summary(oct_octa_clin_mri_g$frontal_pole, na.rm = T)
+sd(oct_octa_clin_mri_g$frontal_pole, na.rm = T)
+hist(oct_octa_clin_mri_g$frontal_pole, col = "firebrick3", breaks=50)
+
+#MFC
+summary(oct_octa_clin_mri_g$MFC, na.rm = T)
+sd(oct_octa_clin_mri_g$MFC, na.rm = T)
+hist(oct_octa_clin_mri_g$MFC, col = "firebrick3", breaks=50)
+
+#Cerebellum exterior
+
+summary(oct_octa_clin_mri_g$cerebellum_exterior, na.rm = T)
+sd(oct_octa_clin_mri_g$cerebellum_exterior, na.rm = T)
+hist(oct_octa_clin_mri_g$cerebellum_exterior, col = "firebrick3", breaks=50)
+
+```
+
+## MRI models- involving main volumes- GCIPL
+
+```{r}
+
+##Compare models OCT vs OCTA (MRI as predictor) and look at AIC
+
+##Note gm models are total grey 
+
+#GCIPL
+model_lv_gcipl <- lme(av_6mm ~ lesion_volume*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lv_gcipl)
+intervals(model_lv_gcipl)
+multicollinearity(model_lv_gcipl)
+
+plot_model(model_lv_gcipl, type = 'emm', terms= c('lesion_volume', 'oct_optic_neuritis'))
+emtrends(model_lv_gcipl, pairwise ~ oct_optic_neuritis, var = 'lesion_volume', infer = T)
+
+ggplot(oct_octa_clin_mri_g, aes(x=av_6mm, y=lesion_volume)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("GCIPL vs T2 lesion volume")
+
+model_lv_gcipl2 <- lme(av_6mm ~ lesion_volume*disease_duration + oct_optic_neuritis + age + sex + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lv_gcipl2)
+intervals(model_lv_gcipl2)
+multicollinearity(model_lv_gcipl2)
+
+anova(model_lv_gcipl, model_lv_gcipl2) 
+compare_models(model_lv_gcipl, model_lv_gcipl2) 
+plot(compare_performance(model_lv_gcipl, model_lv_gcipl2, rank = TRUE, verbose = FALSE))
+
+model_cgm_gcipl <- lme(av_6mm ~ cgm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_cgm_gcipl)
+intervals(model_cgm_gcipl)
+multicollinearity(model_cgm_gcipl)
+
+ggplot(oct_octa_clin_mri_g, aes(x=av_6mm, y= cgm_adjusted)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("GCIPL vs cortical grey matter volume")
+
+model_dgm_gcipl <- lme(av_6mm ~ dgm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_dgm_gcipl)
+intervals(model_dgm_gcipl)
+multicollinearity(model_dgm_gcipl)
+
+model_gm_gcipl <- lme(av_6mm ~ gm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_gm_gcipl)
+intervals(model_gm_gcipl)
+multicollinearity(model_gm_gcipl)
+
+model_gm_gcipl2 <- lme(av_6mm ~ gm_adjusted*disease_duration + oct_optic_neuritis + age + sex + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_gm_gcipl2)
+intervals(model_gm_gcipl2)
+multicollinearity(model_gm_gcipl2)
+
+AICc(model_gm_gcipl)
+AICc(model_gm_gcipl2)
+
+model_gmf_gcipl <- lme(av_6mm ~ GMF*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_gmf_gcipl)
+intervals(model_gmf_gcipl)
+multicollinearity(model_gmf_gcipl)
+
+model_wm_gcipl <- lme(av_6mm ~ wm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_wm_gcipl)
+intervals(model_wm_gcipl)
+multicollinearity(model_wm_gcipl)
+
+model_wm_gcipl2 <- lme(av_6mm ~ wm_adjusted*disease_duration + oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_wm_gcipl2)
+intervals(model_wm_gcipl2)
+multicollinearity(model_wm_gcipl2)
+
+AICc(model_wm_gcipl)
+AICc(model_wm_gcipl2)
+
+model_lesion_no_gcipl <- lme(av_6mm ~ lesion_no*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lesion_no_gcipl)
+intervals(model_lesion_no_gcipl)
+multicollinearity(model_lesion_no_gcipl)
+
+plot_model(model_lesion_no_gcipl, type = 'emm', terms= c('lesion_no', 'oct_optic_neuritis'))
+emtrends(model_lesion_no_gcipl, pairwise ~ oct_optic_neuritis, var = 'lesion_no', infer = T)
+
+models.gcipl.mri <- list(model_lv_gcipl, model_cgm_gcipl, model_dgm_gcipl, model_gm_gcipl, model_wm_gcipl, model_lesion_no_gcipl)
+model.names.gcipl.mri <-c('t2lv', 'cgm', 'dgm', 'total grey', 'wm', 'lesion number')
+aictab(cand.set = models.gcipl.mri , modnames = model.names.gcipl.mri)
+
+```
+
+## MRI models- main volumes- pRNFL
+
+```{r}
+
+
+model_t2lv_prnfl<- lme(rnfl_mean_g ~ lesion_volume*oct_optic_neuritis + age+ sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_t2lv_prnfl)
+intervals(model_t2lv_prnfl)
+multicollinearity(model_t2lv_prnfl)
+
+model_wm_prnfl<- lme(rnfl_mean_g ~ wm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt,  data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_wm_prnfl)
+intervals(model_wm_prnfl)
+multicollinearity(model_wm_prnfl)
+
+model_cgm_prnfl<- lme(rnfl_mean_g ~ cgm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt,  data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_cgm_prnfl)
+intervals(model_cgm_prnfl)
+multicollinearity(model_cgm_prnfl)
+
+model_dgm_prnfl<- lme(rnfl_mean_g ~ dgm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_dgm_prnfl)
+intervals(model_dgm_prnfl)
+multicollinearity(model_dgm_prnfl)
+
+model_gm_prnfl<- lme(rnfl_mean_g ~ gm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_gm_prnfl)
+intervals(model_gm_prnfl)
+multicollinearity(model_gm_prnfl)
+
+model_lesion_no_prnfl <- lme(rnfl_mean_g ~ lesion_no*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lesion_no_prnfl)
+intervals(model_lesion_no_prnfl)
+multicollinearity(model_lesion_no_prnfl)
+
+models.rnfl.mri <- list(model_t2lv_prnfl, model_cgm_prnfl, model_dgm_prnfl, model_gm_prnfl, model_wm_prnfl, model_lesion_no_prnfl)
+model.names.rnfl.mri <-c('t2lv', 'cgm', 'dgm', 'total grey', 'wm', 'lesion number')
+aictab(cand.set = models.rnfl.mri , modnames = model.names.rnfl.mri)
+
+```
+
+## MRI models- involving main volumes- VAD
+
+```{r}
+
+
+#T2LV
+model_t2lv_vad <- lme(vad ~ lesion_volume*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_t2lv_vad)
+intervals(model_t2lv_vad)
+multicollinearity(model_t2lv_vad)
+
+cor(oct_octa_clin_mri_g$lesion_volume, oct_octa_clin_mri_g$wm)
+
+ggplot(oct_octa_clin_mri_g, aes(x=vad, y=lesion_volume)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("VAD vs T2 lesion volume")
+
+plot_model(model_t2lv_vad, type = 'emm', terms = c('lesion_volume', 'oct_optic_neuritis'), show.data = T)
+
+model_t2lv_vad2 <- lme(vad ~ lesion_volume*disease_duration + oct_optic_neuritis + age + sex + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_t2lv_vad2)
+intervals(model_t2lv_vad2)
+multicollinearity(model_t2lv_vad2)
+
+anova(model_t2lv_vad, model_t2lv_vad2) 
+compare_models(model_t2lv_vad, model_t2lv_vad2) 
+plot(compare_performance(model_t2lv_vad, model_t2lv_vad2, rank = TRUE, verbose = FALSE))
+
+#CGM
+model_cgm_vad <- lme(vad ~ cgm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_cgm_vad)
+intervals(model_cgm_vad)
+multicollinearity(model_cgm_vad)
+
+ggplot(oct_octa_clin_mri_g, aes(x=vad, y= cgm_adjusted)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("VAD vs cortical grey matter volume")
+
+model_cgm_vad2 <- lme(vad ~ cgm_adjusted*disease_duration + oct_optic_neuritis + age + sex + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_cgm_vad2)
+intervals(model_cgm_vad2)
+multicollinearity(model_cgm_vad2)
+
+compare_models(model_cgm_vad, model_cgm_vad2)
+AICc(model_cgm_vad)
+AICc(model_cgm_vad2)
+
+#DGM
+model_dgm_vad <- lme(vad ~ dgm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_dgm_vad)
+intervals(model_dgm_vad)
+multicollinearity(model_dgm_vad)
+
+#GM
+model_gm_vad <- lme(vad ~ gm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_gm_vad)
+intervals(model_gm_vad)
+multicollinearity(model_gm_vad)
+
+plot_model(model_gm_vad, type = 'emm', terms = c('gm_adjusted', 'oct_optic_neuritis'), show.data = T)
+
+ggplot(oct_octa_clin_mri_g, aes(x=vad, y= gm_adjusted)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("VAD vs Total grey matter volume")
+
+#WM
+model_wm_vad <- lme(vad ~ wm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_wm_vad)
+intervals(model_wm_vad)
+multicollinearity(model_wm_vad)
+
+ggplot(oct_octa_clin_mri_g, aes(x=vad, y= wm_adjusted)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("VAD vs White matter volume")
+
+model_wm_vad2 <- lme(vad ~ wm_adjusted*disease_duration + oct_optic_neuritis + age + sex + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_wm_vad2)
+intervals(model_wm_vad2)
+multicollinearity(model_wm_vad2)
+
+AICc(model_wm_vad)
+AICc(model_wm_vad2)
+
+#Lesion number
+model_lesion_no_vad <- lme(vad ~ lesion_no*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lesion_no_vad)
+intervals(model_lesion_no_vad)
+multicollinearity(model_lesion_no_vad)
+
+ggplot(oct_octa_clin_mri_g, aes(x=vad, y= lesion_no)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("VAD vs Lesion number")
+
+
+models.vad.mri <- list(model_t2lv_vad, model_cgm_vad, model_dgm_vad, model_gm_vad, model_wm_vad, model_lesion_no_vad)
+model.names.vad.mri <-c('t2lv', 'cgm', 'dgm', 'total grey', 'wm', 'lesion number')
+aictab(cand.set = models.vad.mri, modnames = model.names.vad.mri)
+
+```
+
+## Sensitivity analysis- VAD and main volumes + HET-DMT
+
+```{r}
+
+#T2LV
+model_t2lv_vad_het <- lme(vad ~ lesion_volume*oct_optic_neuritis + age + sex + disease_duration + het_prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_t2lv_vad_het)
+intervals(model_t2lv_vad_het)
+multicollinearity(model_t2lv_vad_het)
+
+#WM
+model_wm_vad_het <- lme(vad ~ wm_adjusted*oct_optic_neuritis + age + sex + disease_duration + het_prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_wm_vad_het)
+intervals(model_wm_vad_het)
+multicollinearity(model_wm_vad_het)
+
+#DGM
+model_dgm_vad_het <- lme(vad ~ dgm_adjusted*oct_optic_neuritis + age + sex + disease_duration + het_prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_dgm_vad_het)
+intervals(model_dgm_vad_het)
+multicollinearity(model_dgm_vad_het)
+
+#CGM
+model_cgm_vad_het <- lme(vad ~ cgm_adjusted*oct_optic_neuritis + age + sex + disease_duration + het_prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_cgm_vad_het)
+intervals(model_cgm_vad_het)
+multicollinearity(model_cgm_vad_het)
+
+#Lesion number
+model_lesion_no_vad_het <- lme(vad ~ lesion_no*oct_optic_neuritis + age + sex  + disease_duration + het_prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lesion_no_vad_het)
+intervals(model_lesion_no_vad_het)
+multicollinearity(model_lesion_no_vad_het)
+
+```
+
+## MRI models- involving main volumes- VLD
+
+```{r}
+
+
+model_t2lv_vld <- lme(vld_pct ~ lesion_volume*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_t2lv_vld)
+intervals(model_t2lv_vld)
+multicollinearity(model_t2lv_vld)
+
+model_cgm_vld <- lme(vld_pct ~ cgm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_cgm_vld)
+intervals(model_cgm_vld)
+multicollinearity(model_cgm_vld)
+
+ggplot(oct_octa_clin_mri_g, aes(x=vld_pct, y= cgm_adjusted)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("VLD vs cortical grey matter volume")
+
+model_dgm_vld <- lme(vld_pct ~ dgm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_dgm_vld)
+intervals(model_dgm_vld)
+multicollinearity(model_dgm_vld)
+
+model_gm_vld <- lme(vld_pct ~ gm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_gm_vld)
+intervals(model_gm_vld)
+multicollinearity(model_gm_vld)
+
+model_wm_vld <- lme(vld_pct ~ wm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_wm_vld)
+intervals(model_wm_vld)
+multicollinearity(model_wm_vld)
+
+model_lesion_no_vld <- lme(vld_pct ~ lesion_no*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lesion_no_vld)
+intervals(model_lesion_no_vld)
+multicollinearity(model_lesion_no_vld)
+
+ggplot(oct_octa_clin_mri_g, aes(x=vld_pct, y= lesion_no)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("VLD vs Lesion number")
+
+```
+
+## MRI models- involving main volumes- FD
+
+```{r}
+
+model_t2lv_fd <- lme(fd ~ lesion_volume*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_t2lv_fd)
+intervals(model_t2lv_fd)
+multicollinearity(model_t2lv_fd)
+
+model_cgm_fd <- lme(fd ~ cgm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_cgm_fd)
+intervals(model_cgm_fd)
+multicollinearity(model_cgm_fd)
+
+ggplot(oct_octa_clin_mri_g, aes(x=fd, y= cgm_adjusted)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("Fractal dimension vs cortical grey matter volume")
+
+model_dgm_fd <- lme(fd ~ dgm_adjusted + age + sex + disease_duration + prop_dmt + oct_optic_neuritis, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_dgm_fd)
+intervals(model_dgm_fd)
+multicollinearity(model_dgm_fd)
+
+model_gm_fd <- lme(fd ~ gm_adjusted*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_gm_fd)
+intervals(model_gm_fd)
+multicollinearity(model_gm_fd)
+
+ggplot(oct_octa_clin_mri_g, aes(x=fd, y= gm_adjusted)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("Fractal dimension vs Grey matter volume")
+
+model_wm_fd <- lme(fd ~ wm_adjusted*oct_optic_neuritis + age + sex + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_wm_fd)
+intervals(model_wm_fd)
+multicollinearity(model_wm_fd)
+
+model_lesion_no_fd <- lme(fd ~ lesion_no*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lesion_no_fd)
+intervals(model_lesion_no_fd)
+multicollinearity(model_lesion_no_fd)
+
+plot_model(model_lesion_no_fd, type = 'emm', terms = c('lesion_no', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_lesion_no_fd, pairwise ~ oct_optic_neuritis, var = "lesion_no", infer = T)
+emtrends(model_lesion_no_fd, pairwise ~ oct_optic_neuritis, var = "lesion_no", infer = T) %>% plot()
+
+ggplot(oct_octa_clin_mri_g, aes(x=fd, y= lesion_no)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("Fractal dimension vs Lesion number")
+
+```
+
+## MRI models- parcellated brain volumes- GCIPL
+
+```{r}
+
+#adjust with adjusted gm
+
+model_thalamus_gcipl <- lme(av_6mm ~ thalamus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_thalamus_gcipl)
+intervals(model_thalamus_gcipl)
+multicollinearity(model_thalamus_gcipl)
+
+model_thalamus_gcipl2 <- lme(av_6mm ~ thalamus*disease_duration + oct_optic_neuritis + age + sex + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_thalamus_gcipl2)
+intervals(model_thalamus_gcipl2)
+multicollinearity(model_thalamus_gcipl2)
+                  
+AICc(model_thalamus_gcipl)
+AICc(model_thalamus_gcipl2)
+
+model_chiasm_gcipl <- lme(av_6mm ~ optic_chiasm*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_chiasm_gcipl)
+intervals(model_chiasm_gcipl)
+multicollinearity(model_chiasm_gcipl)
+
+model_occipital_pole_gcipl <- lme(av_6mm ~ occipital_pole*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_occipital_pole_gcipl)
+intervals(model_occipital_pole_gcipl) 
+multicollinearity(model_occipital_pole_gcipl)
+
+ggplot(oct_octa_clin_mri_g, aes(x=av_6mm, y= occipital_pole)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("mGCIPL vs Occipital pole volume")
+
+model_occipital_pole_gcipl2 <- lme(av_6mm ~ occipital_pole*disease_duration + oct_optic_neuritis + age + sex + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_occipital_pole_gcipl2)
+intervals(model_occipital_pole_gcipl2) 
+multicollinearity(model_occipital_pole_gcipl2)
+
+AICc(model_occipital_pole_gcipl)
+AICc(model_occipital_pole_gcipl2)
+
+model_calcarine_gcipl <- lme(av_6mm ~ calcarine_cortex*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_calcarine_gcipl)
+intervals(model_calcarine_gcipl)
+multicollinearity(model_calcarine_gcipl)
+
+model_sog_gcipl <- lme(av_6mm ~ superior_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_sog_gcipl)
+intervals(model_sog_gcipl)
+multicollinearity(model_sog_gcipl)
+
+model_iog_gcipl <- lme(av_6mm ~ inferior_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_iog_gcipl)
+intervals(model_iog_gcipl)
+multicollinearity(model_iog_gcipl)
+
+model_mog_gcipl <- lme(av_6mm ~ middle_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_mog_gcipl)
+intervals(model_mog_gcipl)
+multicollinearity(model_mog_gcipl)
+
+model_cun_gcipl <- lme(av_6mm ~ cuneus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_cun_gcipl)
+intervals(model_cun_gcipl)
+multicollinearity(model_cun_gcipl)
+
+model_OFuG_gcipl <- lme(av_6mm ~ OFuG*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_gcipl)
+intervals(model_OFuG_gcipl)
+multicollinearity(model_OFuG_gcipl)
+
+plot_model(model_OFuG_gcipl, type = 'emm', terms = c('OFuG', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_OFuG_gcipl, pairwise ~ oct_optic_neuritis, var = "OFuG", infer = T)
+emtrends(model_OFuG_gcipl, pairwise ~ oct_optic_neuritis, var = "OFuG", infer = T) %>% plot()
+
+model_OFuG_gcipl2 <- lme(av_6mm ~ OFuG*disease_duration + oct_optic_neuritis + age + sex + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_gcipl2)
+intervals(model_OFuG_gcipl2)
+multicollinearity(model_OFuG_gcipl2)
+
+AICc(model_OFuG_gcipl)
+AICc(model_OFuG_gcipl2)
+
+#Lingual gyrus
+model_lingual_gcipl <- lme(av_6mm ~ lingual_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_gcipl)
+intervals(model_lingual_gcipl)
+multicollinearity(model_lingual_gcipl)
+
+plot_model(model_lingual_gcipl, type = 'emm', terms = c('lingual_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_lingual_gcipl, pairwise ~ oct_optic_neuritis, var = "lingual_gyrus", infer = T)
+emtrends(model_lingual_gcipl, pairwise ~ oct_optic_neuritis, var = "lingual_gyrus", infer = T) %>% plot()
+
+model_lingual_gcipl2 <- lme(av_6mm ~ lingual_gyrus*disease_duration + oct_optic_neuritis + age + sex + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_gcipl2)
+intervals(model_lingual_gcipl2)
+multicollinearity(model_lingual_gcipl2)
+
+AICc(model_lingual_gcipl)
+AICc(model_lingual_gcipl2)
+
+#STG
+
+model_stg_gcipl <- lme(av_6mm ~ superior_temporal_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_stg_gcipl)
+intervals(model_stg_gcipl)
+multicollinearity(model_stg_gcipl)
+
+#ITG
+
+model_itg_gcipl <- lme(av_6mm ~ inferior_temporal_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_itg_gcipl)
+intervals(model_itg_gcipl)
+multicollinearity(model_itg_gcipl)
+
+plot_model(model_itg_gcipl, type = 'emm', terms = c('inferior_temporal_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_itg_gcipl, pairwise ~ oct_optic_neuritis, var = "inferior_temporal_gyrus", infer = T)
+emtrends(model_itg_gcipl, pairwise ~ oct_optic_neuritis, var = "inferior_temporal_gyrus", infer = T) %>% plot()
+
+#SPL
+
+model_spl_gcipl <- lme(av_6mm ~ superior_parietal_lobe*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_spl_gcipl)
+intervals(model_spl_gcipl)
+multicollinearity(model_spl_gcipl)
+
+plot_model(model_spl_gcipl, type = 'emm', terms = c('superior_parietal_lobe', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_spl_gcipl, pairwise ~ oct_optic_neuritis, var = "superior_parietal_lobe", infer = T)
+emtrends(model_spl_gcipl, pairwise ~ oct_optic_neuritis, var = "superior_parietal_lobe", infer = T) %>% plot()
+
+#Postcentral gyrus
+model_postcentral_gcipl <- lme(av_6mm ~ postcentral_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_postcentral_gcipl)
+intervals(model_postcentral_gcipl)
+multicollinearity(model_postcentral_gcipl)
+
+plot_model(model_postcentral_gcipl, type = 'emm', terms = c('postcentral_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_postcentral_gcipl, pairwise ~ oct_optic_neuritis, var = "postcentral_gyrus", infer = T)
+emtrends(model_postcentral_gcipl, pairwise ~ oct_optic_neuritis, var = "postcentral_gyrus", infer = T) %>% plot()
+
+#Frontal pole
+model_frontal_pole_gcipl <- lme(av_6mm ~ frontal_pole*oct_optic_neuritis + age + sex + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_frontal_pole_gcipl)
+intervals(model_frontal_pole_gcipl)
+multicollinearity(model_frontal_pole_gcipl)
+
+#MFC
+model_MFC_gcipl <- lme(av_6mm ~ MFC*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_MFC_gcipl)
+intervals(model_MFC_gcipl)
+multicollinearity(model_MFC_gcipl)
+
+plot_model(model_MFC_gcipl, type = 'emm', terms = c('MFC', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_MFC_gcipl, pairwise ~ oct_optic_neuritis, var = "MFC", infer = T)
+emtrends(model_MFC_gcipl, pairwise ~ oct_optic_neuritis, var = "MFC", infer = T) %>% plot()
+
+```
+
+## MRI models- ishihara- GCIPL interactions
+
+```{r}
+
+#Filter out bilateral NON eyes
+
+bilateral_non <-oct_octa_clin_mri_g %>%
+  group_by(patient_id) %>%                  # replace with your actual subject ID column
+  filter(all(oct_optic_neuritis == "no")) %>%  # keeps only subjects where all eyes are non-ON
+  ungroup()
+
+#Occipital fusiform gyrus
+model_OFuG_gcipl_non_int <- lme(lcva_ishihara_plates ~ av_6mm + OFuG + av_6mm*OFuG + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_gcipl_non_int)
+intervals(model_OFuG_gcipl_non_int)
+multicollinearity(model_OFuG_gcipl_non_int) 
+
+plot_model(model_OFuG_gcipl_non_int, type = 'emm', terms = c('av_6mm', 'OFuG'), show.data = T)
+emtrends(model_OFuG_gcipl_non_int, pairwise ~ OFuG, at =list(OFuG = c(7000, 8000, 9000)), var = "av_6mm", infer = T)
+
+model_OFuG_gcipl_non <- lme(lcva_ishihara_plates ~ OFuG + av_6mm + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_gcipl_non)
+intervals(model_OFuG_gcipl_non)
+multicollinearity(model_OFuG_gcipl_non)
+
+anova(model_OFuG_gcipl_non_int, model_OFuG_gcipl_non)
+
+#Lingual gyrus
+model_lingual_gcipl_non_int <- lme(lcva_ishihara_plates ~ av_6mm + lingual_gyrus +av_6mm*lingual_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_gcipl_non_int)
+intervals(model_lingual_gcipl_non_int)
+multicollinearity(model_lingual_gcipl_non_int) 
+
+model_lingual_gcipl_non <- lme(lcva_ishihara_plates ~ av_6mm + lingual_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_gcipl_non)
+intervals(model_lingual_gcipl_non)
+multicollinearity(model_lingual_gcipl_non) 
+
+anova(model_lingual_gcipl_non, model_lingual_gcipl_non_int)
+
+#Inferior temporal lobe
+model_inferior_temporal_gcipl_non_int <- lme(lcva_ishihara_plates ~ av_6mm + inferior_temporal_gyrus + av_6mm*inferior_temporal_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_inferior_temporal_gcipl_non_int)
+intervals(model_inferior_temporal_gcipl_non_int)
+multicollinearity(model_inferior_temporal_gcipl_non_int) 
+
+plot_model(model_inferior_temporal_gcipl_non_int, type = 'emm', terms = c('av_6mm', 'inferior_temporal_gyrus'), show.data = T)
+emtrends(model_inferior_temporal_gcipl_non_int, pairwise ~ inferior_temporal_gyrus, at =list(OFuG = c(7000, 8000, 9000)), var = "av_6mm", infer = T)
+
+model_inferior_temporal_gcipl_non <- lme(lcva_ishihara_plates ~ av_6mm + inferior_temporal_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit) 
+summary(model_inferior_temporal_gcipl_non)
+intervals(model_inferior_temporal_gcipl_non)
+multicollinearity(model_inferior_temporal_gcipl_non) 
+
+anova(model_inferior_temporal_gcipl_non, model_inferior_temporal_gcipl_non_int)
+
+```
+
+## MRI models- parcellated brain volumes- pRNFL
+
+```{r}
+
+model_thalamus_rnfl <- lme(rnfl_mean_g ~ thalamus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_thalamus_rnfl)
+intervals(model_thalamus_rnfl)
+multicollinearity(model_thalamus_rnfl)
+
+model_chiasm_rnfl <- lme(rnfl_mean_g ~ optic_chiasm*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_chiasm_rnfl)
+intervals(model_chiasm_rnfl)
+multicollinearity(model_chiasm_rnfl)
+
+model_occipital_pole_rnfl <- lme(rnfl_mean_g ~ occipital_pole*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_occipital_pole_rnfl)
+intervals(model_occipital_pole_rnfl)
+multicollinearity(model_occipital_pole_rnfl)
+
+plot_model(model_occipital_pole_rnfl, type = 'emm', terms = c('occipital_pole', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_occipital_pole_rnfl, pairwise ~ oct_optic_neuritis, var = "occipital_pole", infer = T)
+emtrends(model_occipital_pole_rnfl, pairwise ~ oct_optic_neuritis, var = "occipital_pole", infer = T) %>% plot()
+
+model_calcarine_rnfl <- lme(rnfl_mean_g ~ calcarine_cortex*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_calcarine_rnfl)
+intervals(model_calcarine_rnfl)
+multicollinearity(model_calcarine_rnfl)
+
+plot_model(model_calcarine_rnfl, type = 'emm', terms = c('calcarine_cortex', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_calcarine_rnfl, pairwise ~ oct_optic_neuritis, var = "calcarine_cortex", infer = T)
+emtrends(model_calcarine_rnfl, pairwise ~ oct_optic_neuritis, var = "calcarine_cortex", infer = T) %>% plot()
+
+model_sog_rnfl <- lme(rnfl_mean_g ~ superior_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_sog_rnfl)
+intervals(model_sog_rnfl)
+multicollinearity(model_sog_rnfl)
+
+model_iog_rnfl <- lme(rnfl_mean_g ~ inferior_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_iog_rnfl) 
+intervals(model_iog_rnfl)
+multicollinearity(model_iog_rnfl)
+
+plot_model(model_iog_rnfl, type = 'emm', terms = c('inferior_occipital_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_iog_rnfl, pairwise ~ oct_optic_neuritis, var = "inferior_occipital_gyrus", infer = T)
+emtrends(model_iog_rnfl, pairwise ~ oct_optic_neuritis, var = "inferior_occipital_gyrus", infer = T) %>% plot()
+
+model_mog_rnfl <- lme(rnfl_mean_g ~ middle_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_mog_rnfl)
+intervals(model_mog_rnfl)
+multicollinearity(model_mog_rnfl)
+
+model_cun_rnfl <- lme(rnfl_mean_g ~ cuneus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_cun_rnfl)
+intervals(model_cun_rnfl)
+multicollinearity(model_cun_rnfl)
+
+plot_model(model_cun_rnfl, type = 'emm', terms = c('cuneus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_cun_rnfl, pairwise ~ oct_optic_neuritis, var = "cuneus", infer = T)
+emtrends(model_cun_rnfl, pairwise ~ oct_optic_neuritis, var = "cuneus", infer = T) %>% plot()
+
+model_OFuG_rnfl <- lme(rnfl_mean_g ~ OFuG*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_rnfl)
+intervals(model_OFuG_rnfl)
+multicollinearity(model_OFuG_rnfl)
+
+plot_model(model_OFuG_rnfl, type = 'emm', terms = c('OFuG', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_OFuG_rnfl, pairwise ~ oct_optic_neuritis, var = "OFuG", infer = T)
+emtrends(model_OFuG_rnfl, pairwise ~ oct_optic_neuritis, var = "OFuG", infer = T) %>% plot()
+
+model_lingual_rnfl <- lme(rnfl_mean_g ~ lingual_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_rnfl)
+intervals(model_lingual_rnfl)
+multicollinearity(model_lingual_rnfl)
+
+plot_model(model_lingual_rnfl, type = 'emm', terms = c('lingual_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_lingual_rnfl, pairwise ~ oct_optic_neuritis, var = "lingual_gyrus", infer = T)
+emtrends(model_lingual_rnfl, pairwise ~ oct_optic_neuritis, var = "lingual_gyrus", infer = T) %>% plot()
+
+model_stg_rnfl <- lme(rnfl_mean_g ~ superior_temporal_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_stg_rnfl)
+intervals(model_stg_rnfl)
+multicollinearity(model_stg_rnfl)
+
+model_itg_rnfl <- lme(rnfl_mean_g ~ inferior_temporal_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_itg_rnfl)
+intervals(model_itg_rnfl)
+multicollinearity(model_itg_rnfl)
+
+plot_model(model_itg_rnfl, type = 'emm', terms = c('inferior_temporal_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_itg_rnfl, pairwise ~ oct_optic_neuritis, var = "inferior_temporal_gyrus", infer = T)
+
+model_spl_rnfl <- lme(rnfl_mean_g ~ superior_parietal_lobe*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_spl_rnfl)
+intervals(model_spl_rnfl)
+multicollinearity(model_spl_rnfl)
+
+plot_model(model_spl_rnfl, type = 'emm', terms = c('superior_parietal_lobe', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_spl_rnfl, pairwise ~ oct_optic_neuritis, var = "superior_parietal_lobe", infer = T)
+emtrends(model_spl_rnfl, pairwise ~ oct_optic_neuritis, var = "superior_parietal_lobe", infer = T) %>% plot()
+model_postcentral_rnfl <- lme(rnfl_mean_g ~ postcentral_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_postcentral_rnfl)
+intervals(model_postcentral_rnfl)
+multicollinearity(model_postcentral_rnfl)
+
+model_frontal_pole_rnfl <- lme(rnfl_mean_g ~ frontal_pole*oct_optic_neuritis + age + sex+ disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_frontal_pole_rnfl)
+intervals(model_frontal_pole_rnfl)
+multicollinearity(model_frontal_pole_rnfl)
+
+plot_model(model_frontal_pole_rnfl, type = 'emm', terms = c('frontal_pole', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_frontal_pole_rnfl, pairwise ~ oct_optic_neuritis, var = "frontal_pole", infer = T)
+emtrends(model_frontal_pole_rnfl, pairwise ~ oct_optic_neuritis, var = "frontal_pole", infer = T) %>% plot()
+
+model_MFC_rnfl <- lme(rnfl_mean_g ~ MFC*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_MFC_rnfl)
+intervals(model_MFC_rnfl)
+multicollinearity(model_MFC_rnfl)
+
+plot_model(model_MFC_rnfl, type = 'emm', terms = c('MFC', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_MFC_rnfl, pairwise ~ oct_optic_neuritis, var = "MFC", infer = T)
+emtrends(model_MFC_rnfl, pairwise ~ oct_optic_neuritis, var = "MFC", infer = T) %>% plot()
+
+```
+
+## MRI models- ishihara- pRNFL interactions
+
+```{r}
+
+model_OFuG_rnfl_non_int <- lme(lcva_ishihara_plates ~ rnfl_mean_g + OFuG + rnfl_mean_g*OFuG + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_rnfl_non_int) 
+intervals(model_OFuG_rnfl_non_int)
+multicollinearity(model_OFuG_rnfl_non_int) 
+
+plot_model(model_OFuG_rnfl_non_int, type = 'emm', terms = c('rnfl_mean_g', 'OFuG'), show.data = T)
+emtrends(model_OFuG_rnfl_non_int, pairwise ~ OFuG, at =list(OFuG = c(7000, 8000, 9000)), var = "rnfl_mean_g", infer = T)
+
+model_OFuG_rnfl_non <- lme(lcva_ishihara_plates ~ OFuG + rnfl_mean_g + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_rnfl_non)
+intervals(model_OFuG_rnfl_non)
+multicollinearity(model_OFuG_rnfl_non)
+
+anova(model_OFuG_rnfl_non, model_OFuG_rnfl_non_int)
+
+model_lingual_rnfl_non_int <- lme(lcva_ishihara_plates ~ rnfl_mean_g + lingual_gyrus +rnfl_mean_g*lingual_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_rnfl_non_int)
+intervals(model_lingual_rnfl_non_int)
+multicollinearity(model_lingual_rnfl_non_int) 
+
+model_lingual_rnfl_non <- lme(lcva_ishihara_plates ~ rnfl_mean_g + lingual_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_rnfl_non)
+intervals(model_lingual_rnfl_non)
+multicollinearity(model_lingual_rnfl_non) 
+
+anova(model_lingual_rnfl_non, model_lingual_rnfl_non_int)
+
+model_inferior_temporal_rnfl_non_int <- lme(lcva_ishihara_plates ~ rnfl_mean_g + inferior_temporal_gyrus + rnfl_mean_g*inferior_temporal_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_inferior_temporal_rnfl_non_int)
+intervals(model_inferior_temporal_rnfl_non_int)
+multicollinearity(model_inferior_temporal_rnfl_non_int) 
+
+plot_model(model_inferior_temporal_rnfl_non_int, type = 'emm', terms = c('rnfl_mean_g', 'inferior_temporal_gyrus'), show.data = T)
+emtrends(model_inferior_temporal_rnfl_non_int, pairwise ~ inferior_temporal_gyrus, at =list(OFuG = c(7000, 8000, 9000)), var = "rnfl_mean_g", infer = T)
+
+model_inferior_temporal_rnfl_non <- lme(lcva_ishihara_plates ~ rnfl_mean_g + inferior_temporal_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit) 
+summary(model_inferior_temporal_rnfl_non)
+intervals(model_inferior_temporal_rnfl_non)
+multicollinearity(model_inferior_temporal_rnfl_non) 
+
+anova(model_inferior_temporal_rnfl_non, model_inferior_temporal_rnfl_non_int)
+
+
+```
+
+## MRI models- parcellated brain volumes- VAD
+
+```{r}
+
+
+model_thalamus_vad <- lme(vad ~ thalamus*oct_optic_neuritis + age + sex + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_thalamus_vad)
+intervals(model_thalamus_vad)
+multicollinearity(model_thalamus_vad)
+
+model_thalamus_vad2 <- lme(vad ~ thalamus*disease_duration + oct_optic_neuritis + age + sex + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_thalamus_vad2)
+intervals(model_thalamus_vad2)
+multicollinearity(model_thalamus_vad2)
+
+AICc(model_thalamus_vad)
+AICc(model_thalamus_vad2)
+
+model_chiasm_vad <- lme(vad ~ optic_chiasm*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_chiasm_vad)
+intervals(model_chiasm_vad)
+multicollinearity(model_chiasm_vad)
+
+plot_model(model_chiasm_vad, type = 'emm', terms = c('optic_chiasm', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_chiasm_vad, pairwise ~ oct_optic_neuritis, var = "optic_chiasm", infer = T)
+emtrends(model_chiasm_vad, pairwise ~ oct_optic_neuritis, var = "optic_chiasm", infer = T) %>% plot()
+
+model_occipital_pole_vad <- lme(vad ~ occipital_pole*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_occipital_pole_vad)
+intervals(model_occipital_pole_vad)
+multicollinearity(model_occipital_pole_vad)
+
+ggplot(oct_octa_clin_mri_g, aes(x=vad, y= occipital_pole)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("VAD vs Occipital pole volume")
+
+model_occipital_pole_vad2 <- lme(vad ~ occipital_pole*disease_duration + oct_optic_neuritis + age + sex  +  + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_occipital_pole_vad2)
+intervals(model_occipital_pole_vad2)
+multicollinearity(model_occipital_pole_vad2)
+
+AICc(model_occipital_pole_vad)
+AICc(model_occipital_pole_vad2)
+
+model_calcarine_vad <- lme(vad ~ calcarine_cortex*oct_optic_neuritis + disease_duration + age + sex + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_calcarine_vad)
+intervals(model_calcarine_vad)
+multicollinearity(model_calcarine_vad)
+
+model_sog_vad <- lme(vad ~ superior_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_sog_vad)
+intervals(model_sog_vad)
+multicollinearity(model_sog_vad)
+
+model_iog_vad <- lme(vad ~ inferior_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt +  gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_iog_vad)
+intervals(model_iog_vad)
+multicollinearity(model_iog_vad)
+
+ggplot(oct_octa_clin_mri_g, aes(x=vad, y= inferior_occipital_gyrus)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("VAD vs Inferior occipital gyrus")
+
+model_mog_vad <- lme(vad ~ middle_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_mog_vad)
+intervals(model_mog_vad)
+multicollinearity(model_mog_vad)
+
+model_cun_vad <- lme(vad ~ cuneus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_cun_vad)
+intervals(model_cun_vad)
+multicollinearity(model_cun_vad)
+
+model_OFuG_vad <- lme(vad ~ OFuG*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_vad)
+intervals(model_OFuG_vad)
+multicollinearity(model_OFuG_vad)
+
+plot_model(model_OFuG_vad, type = 'emm', terms = c('OFuG', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_OFuG_vad, pairwise ~ oct_optic_neuritis, var = "OFuG", infer = T)
+emtrends(model_OFuG_vad, pairwise ~ oct_optic_neuritis, var = "OFuG", infer = T) %>% plot()
+
+model_OFuG_vad2 <- lme(vad ~ OFuG*disease_duration + oct_optic_neuritis + age + sex + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_vad2)
+intervals(model_OFuG_vad2)
+multicollinearity(model_OFuG_vad2)
+
+AICc(model_OFuG_vad)
+AICc(model_OFuG_vad2)
+
+model_lingual_vad <- lme(vad ~ lingual_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_vad)
+intervals(model_lingual_vad)
+multicollinearity(model_lingual_vad)
+
+plot_model(model_lingual_vad, type = 'emm', terms = c('lingual_gyrus', 'oct_optic_neuritis'), show.data = T)
+
+emtrends(model_lingual_vad, pairwise ~ oct_optic_neuritis, var = "lingual_gyrus", infer = T)
+emtrends(model_lingual_vad, pairwise ~ oct_optic_neuritis, var = "lingual_gyrus", infer = T) %>% plot()
+
+model_lingual_vad2 <- lme(vad ~ lingual_gyrus*disease_duration + oct_optic_neuritis + age + sex + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_vad2)
+intervals(model_lingual_vad2)
+multicollinearity(model_lingual_vad2)
+
+AICc(model_lingual_vad)
+AICc(model_lingual_vad2)
+
+model_stg_vad <- lme(vad ~ superior_temporal_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_stg_vad)
+intervals(model_stg_vad)
+multicollinearity(model_stg_vad)
+
+model_itg_vad <- lme(vad ~ inferior_temporal_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_itg_vad)
+intervals(model_itg_vad)
+multicollinearity(model_itg_vad)
+
+plot_model(model_itg_vad, type = 'emm', terms = c('inferior_temporal_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_itg_vad, pairwise ~ oct_optic_neuritis, var = "inferior_temporal_gyrus", infer = T)
+emtrends(model_itg_vad, pairwise ~ oct_optic_neuritis, var = "inferior_temporal_gyrus", infer = T) %>% plot()
+
+model_spl_vad <- lme(vad ~ superior_parietal_lobe*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_spl_vad)
+intervals(model_spl_vad)
+multicollinearity(model_spl_vad)
+
+plot_model(model_spl_vad, type = 'emm', terms = c('superior_parietal_lobe', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_spl_vad, pairwise ~ oct_optic_neuritis, var = "superior_parietal_lobe", infer = T)
+emtrends(model_spl_vad, pairwise ~ oct_optic_neuritis, var = "superior_parietal_lobe", infer = T) %>% plot()
+
+model_postcentral_vad <- lme(vad ~ postcentral_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_postcentral_vad)
+intervals(model_postcentral_vad)
+multicollinearity(model_postcentral_vad)
+
+plot_model(model_postcentral_vad, type = 'emm', terms = c('postcentral_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_postcentral_vad, pairwise ~ oct_optic_neuritis, var = "postcentral_gyrus", infer = T)
+emtrends(model_postcentral_vad, pairwise ~ oct_optic_neuritis, var = "postcentral_gyrus", infer = T) %>% plot()
+
+model_frontal_pole_vad <- lme(vad ~ frontal_pole*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_frontal_pole_vad)
+intervals(model_frontal_pole_vad)
+multicollinearity(model_frontal_pole_vad)
+
+model_MFC_vad <- lme(vad ~ MFC*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_MFC_vad)
+intervals(model_MFC_vad)
+multicollinearity(model_MFC_vad)
+
+plot_model(model_MFC_vad, type = 'emm', terms = c('MFC', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_MFC_vad, pairwise ~ oct_optic_neuritis, var = "MFC", infer = T)
+emtrends(model_MFC_vad, pairwise ~ oct_optic_neuritis, var = "MFC", infer = T) %>% plot()
+
+```
+
+## Sensitivity analysis- VAD and parcellated volumes + HET-DMT
+
+```{r}
+
+model_thalamus_vad_het <- lme(vad ~ thalamus*oct_optic_neuritis + age + sex + disease_duration + het_prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_thalamus_vad_het)
+intervals(model_thalamus_vad_het)
+multicollinearity(model_thalamus_vad_het)
+
+model_chiasm_vad_het <- lme(vad ~ optic_chiasm*oct_optic_neuritis + age + sex  + disease_duration + het_prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_chiasm_vad_het)
+intervals(model_chiasm_vad_het)
+multicollinearity(model_chiasm_vad_het)
+
+model_occipital_pole_vad_het <- lme(vad ~ occipital_pole*oct_optic_neuritis + age + sex  + disease_duration + het_prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_occipital_pole_vad_het)
+intervals(model_occipital_pole_vad_het)
+multicollinearity(model_occipital_pole_vad_het)
+
+model_calcarine_vad_het <- lme(vad ~ calcarine_cortex*oct_optic_neuritis + disease_duration + age + sex + het_prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_calcarine_vad_het)
+intervals(model_calcarine_vad_het)
+multicollinearity(model_calcarine_vad_het)
+
+model_sog_vad_het <- lme(vad ~ superior_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + het_prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_sog_vad_het)
+intervals(model_sog_vad_het)
+multicollinearity(model_sog_vad_het)
+
+model_iog_vad_het <- lme(vad ~ inferior_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + het_prop_dmt +  gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_iog_vad_het)
+intervals(model_iog_vad_het)
+multicollinearity(model_iog_vad_het)
+
+model_cun_vad_het <- lme(vad ~ cuneus*oct_optic_neuritis + age + sex  + disease_duration + het_prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_cun_vad_het)
+intervals(model_cun_vad_het)
+multicollinearity(model_cun_vad_het)
+
+model_OFuG_vad_het <- lme(vad ~ OFuG*oct_optic_neuritis + age + sex  + disease_duration + het_prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_vad_het)
+intervals(model_OFuG_vad_het)
+multicollinearity(model_OFuG_vad_het)
+
+model_lingual_vad_het <- lme(vad ~ lingual_gyrus*oct_optic_neuritis + age + sex  + disease_duration + het_prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_vad_het)
+intervals(model_lingual_vad_het)
+multicollinearity(model_lingual_vad_het)
+
+model_itg_vad_het <- lme(vad ~ inferior_temporal_gyrus*oct_optic_neuritis + age + sex  + disease_duration + het_prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_itg_vad_het)
+intervals(model_itg_vad_het)
+multicollinearity(model_itg_vad_het)
+
+model_spl_vad_het <- lme(vad ~ superior_parietal_lobe*oct_optic_neuritis + age + sex  + disease_duration + het_prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_spl_vad_het)
+intervals(model_spl_vad_het)
+multicollinearity(model_spl_vad_het)
+
+```
+
+## MRI models- ishihara- VAD interactions
+
+```{r}
+
+#Filter out bilateral NON eyes
+
+bilateral_non <-oct_octa_clin_mri_g %>%
+  group_by(patient_id) %>%                  # replace with your actual subject ID column
+  filter(all(oct_optic_neuritis == "no")) %>%  # keeps only subjects where all eyes are non-ON
+  ungroup()
+
+bilateral_non%>%distinct(patient_id)
+
+model_OFuG_vad_non_int <- lme(lcva_ishihara_plates ~ vad + OFuG + vad*OFuG + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_vad_non_int)
+intervals(model_OFuG_vad_non_int)
+multicollinearity(model_OFuG_vad_non_int) 
+
+plot_model(model_OFuG_vad_non_int, type = 'emm', terms = c('vad', 'OFuG'), show.data = T)
+emtrends(model_OFuG_vad_non_int, pairwise ~ OFuG, at =list(OFuG = c(7000, 8000, 9000)), var = "vad", infer = T)
+
+model_OFuG_vad_non <- lme(lcva_ishihara_plates ~ OFuG + vad + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_vad_non)
+intervals(model_OFuG_vad_non)
+multicollinearity(model_OFuG_vad_non)
+
+anova(model_OFuG_vad_non, model_OFuG_vad_non_int)
+
+model_lingual_vad_non_int <- lme(lcva_ishihara_plates ~ vad + lingual_gyrus + vad*lingual_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_vad_non_int)
+intervals(model_lingual_vad_non_int)
+multicollinearity(model_lingual_vad_non_int) 
+
+model_lingual_vad_non <- lme(lcva_ishihara_plates ~ vad + lingual_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_vad_non)
+intervals(model_lingual_vad_non)
+multicollinearity(model_lingual_vad_non) 
+
+anova(model_lingual_vad_non, model_lingual_vad_non_int)
+
+model_inferior_temporal_vad_non_int <- lme(lcva_ishihara_plates ~ vad + inferior_temporal_gyrus + vad*inferior_temporal_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_inferior_temporal_vad_non_int)
+intervals(model_inferior_temporal_vad_non_int)
+multicollinearity(model_inferior_temporal_vad_non_int) 
+
+model_inferior_temporal_vad_non <- lme(lcva_ishihara_plates ~ vad + inferior_temporal_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_inferior_temporal_vad_non)
+intervals(model_inferior_temporal_vad_non)
+multicollinearity(model_inferior_temporal_vad_non) 
+anova(model_inferior_temporal_vad_non, model_inferior_temporal_vad_non_int)
+
+```
+
+## MRI models- parcellated brain volumes- VLD
+
+```{r}
+
+model_thalamus_vld <- lme(vld_pct ~ thalamus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_thalamus_vld)
+intervals(model_thalamus_vld)
+multicollinearity(model_thalamus_vld)
+
+model_chiasm_vld <- lme(vld_pct ~ optic_chiasm*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_chiasm_vld)
+intervals(model_chiasm_vld)
+multicollinearity(model_chiasm_vld)
+
+plot_model(model_chiasm_vld, type = 'emm', terms = c('optic_chiasm', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_chiasm_vld, pairwise ~ oct_optic_neuritis, var = "optic_chiasm", infer = T)
+emtrends(model_chiasm_vld, pairwise ~ oct_optic_neuritis, var = "optic_chiasm", infer = T) %>% plot()
+
+model_occipital_pole_vld <- lme(vld_pct ~ occipital_pole*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_occipital_pole_vld)
+intervals(model_occipital_pole_vld)
+multicollinearity(model_occipital_pole_vld)
+
+ggplot(oct_octa_clin_mri_g, aes(x=vld_pct, y= occipital_pole)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("VLD vs Occipital pole volume")
+
+model_calcarine_vld <- lme(vld_pct ~ calcarine_cortex*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_calcarine_vld)
+intervals(model_calcarine_vld)
+multicollinearity(model_calcarine_vld)
+
+model_sog_vld <- lme(vld_pct ~ superior_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_sog_vld)
+intervals(model_sog_vld)
+multicollinearity(model_sog_vld)
+
+model_iog_vld <- lme(vld_pct ~ inferior_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_iog_vld)
+intervals(model_iog_vld)
+multicollinearity(model_iog_vld)
+
+model_mog_vld <- lme(vld_pct ~ middle_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_mog_vld)
+intervals(model_mog_vld)
+multicollinearity(model_mog_vld)
+
+plot_model(model_mog_vld, type = 'emm', terms = c('middle_occipital_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_mog_vld, pairwise ~ oct_optic_neuritis, var = "middle_occipital_gyrus", infer = T)
+emtrends(model_mog_vld, pairwise ~ oct_optic_neuritis, var = "middle_occipital_gyrus", infer = T) %>% plot()
+
+model_cun_vld <- lme(vld_pct ~ cuneus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_cun_vld)
+intervals(model_cun_vld)
+multicollinearity(model_cun_vld)
+
+model_OFuG_vld <- lme(vld_pct ~ OFuG*oct_optic_neuritis+ age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_vld)
+intervals(model_OFuG_vld)
+multicollinearity(model_OFuG_vld)
+
+plot_model(model_OFuG_vld, type = 'emm', terms = c('OFuG', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_OFuG_vld, pairwise ~ oct_optic_neuritis, var = "OFuG", infer = T)
+emtrends(model_OFuG_vld, pairwise ~ oct_optic_neuritis, var = "OFuG", infer = T) %>% plot()
+
+model_lingual_vld <- lme(vld_pct ~ lingual_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_vld)
+intervals(model_lingual_vld)
+multicollinearity(model_lingual_vld)
+
+plot_model(model_lingual_vld, type = 'emm', terms = c('lingual_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_lingual_vld, pairwise ~ oct_optic_neuritis, var = "lingual_gyrus", infer = T)
+emtrends(model_lingual_vld, pairwise ~ oct_optic_neuritis, var = "lingual_gyrus", infer = T) %>% plot()
+
+model_stg_vld <- lme(vld_pct ~ superior_temporal_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_stg_vld)
+intervals(model_stg_vld)
+multicollinearity(model_stg_vld)
+
+model_itg_vld <- lme(vld_pct ~ inferior_temporal_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_itg_vld)
+intervals(model_itg_vld)
+multicollinearity(model_itg_vld)
+
+plot_model(model_itg_vld, type = 'emm', terms = c('inferior_temporal_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_itg_vld, pairwise ~ oct_optic_neuritis, var = "inferior_temporal_gyrus", infer = T)
+emtrends(model_itg_vld, pairwise ~ oct_optic_neuritis, var = "inferior_temporal_gyrus", infer = T) %>% plot()
+
+model_spl_vld <- lme(vld_pct ~ superior_parietal_lobe*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_spl_vld)
+intervals(model_spl_vld)
+multicollinearity(model_spl_vld)
+
+plot_model(model_spl_vld, type = 'emm', terms = c('superior_parietal_lobe', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_spl_vld, pairwise ~ oct_optic_neuritis, var = "superior_parietal_lobe", infer = T)
+emtrends(model_spl_vld, pairwise ~ oct_optic_neuritis, var = "superior_parietal_lobe", infer = T) %>% plot()
+
+model_postcentral_vld <- lme(vld_pct ~ postcentral_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_postcentral_vld)
+intervals(model_postcentral_vld)
+multicollinearity(model_postcentral_vld)
+
+plot_model(model_postcentral_vld, type = 'emm', terms = c('postcentral_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_postcentral_vld, pairwise ~ oct_optic_neuritis, var = "postcentral_gyrus", infer = T)
+emtrends(model_postcentral_vld, pairwise ~ oct_optic_neuritis, var = "postcentral_gyrus", infer = T) %>% plot()
+
+model_frontal_pole_vld <- lme(vld_pct ~ frontal_pole*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_frontal_pole_vld)
+intervals(model_frontal_pole_vld)
+multicollinearity(model_frontal_pole_vld)
+
+model_MFC_vld <- lme(vld_pct ~ MFC*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_MFC_vld)
+intervals(model_MFC_vld)
+multicollinearity(model_MFC_vld)
+
+plot_model(model_MFC_vld, type = 'emm', terms = c('MFC', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_MFC_vld, pairwise ~ oct_optic_neuritis, var = "MFC", infer = T)
+emtrends(model_MFC_vld, pairwise ~ oct_optic_neuritis, var = "MFC", infer = T) %>% plot()
+
+```
+
+## MRI models- ishihara- VLD interactions
+
+```{r}
+
+#Occipital fusiform gyrus
+#With interaction factor
+model_OFuG_vld_non_int <- lme(lcva_ishihara_plates ~ vld_pct + OFuG + vld_pct*OFuG + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_vld_non_int)
+intervals(model_OFuG_vld_non_int)
+multicollinearity(model_OFuG_vld_non_int) 
+
+plot_model(model_OFuG_vld_non_int, type = 'emm', terms = c('vld_pct', 'OFuG'), show.data = T)
+emtrends(model_OFuG_vld_non_int, pairwise ~ OFuG, at =list(OFuG = c(7000, 8000, 9000)), var = "vld_pct", infer = T)
+
+#Without interaction factor
+model_OFuG_vld_non <- lme(lcva_ishihara_plates ~ OFuG + vld_pct + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_vld_non)
+intervals(model_OFuG_vld_non)
+multicollinearity(model_OFuG_vld_non)
+
+#ANOVA
+anova(model_OFuG_vld_non, model_OFuG_vld_non_int)
+
+#Lingual gyrus
+#With interaction factor
+model_lingual_vld_non_int <- lme(lcva_ishihara_plates ~ vld_pct + lingual_gyrus + vld_pct*lingual_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_vld_non_int)
+intervals(model_lingual_vld_non_int)
+multicollinearity(model_lingual_vld_non_int) 
+
+#Without interaction factor
+model_lingual_vld_non <- lme(lcva_ishihara_plates ~ vld_pct + lingual_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_vld_non)
+intervals(model_lingual_vld_non)
+multicollinearity(model_lingual_vld_non) 
+
+#ANOVA
+anova(model_lingual_vld_non, model_lingual_vld_non_int)
+
+#Inferior temporal lobe
+#With interaction factor
+model_inferior_temporal_vld_non_int <- lme(lcva_ishihara_plates ~ vld_pct + inferior_temporal_gyrus + vld_pct*inferior_temporal_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_inferior_temporal_vld_non_int)
+intervals(model_inferior_temporal_vld_non_int)
+multicollinearity(model_inferior_temporal_vld_non_int) 
+
+#Without interaction factor
+model_inferior_temporal_vld_non <- lme(lcva_ishihara_plates ~ vld_pct + inferior_temporal_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_inferior_temporal_vld_non)
+intervals(model_inferior_temporal_vld_non)
+multicollinearity(model_inferior_temporal_vld_non) 
+
+#ANOVA
+anova(model_inferior_temporal_vld_non, model_inferior_temporal_vld_non_int)
+
+```
+
+## MRI models- parcellated brain volumes- FD
+
+```{r}
+
+model_thalamus_fd <- lme(fd ~ thalamus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_thalamus_fd)
+intervals(model_thalamus_fd)
+multicollinearity(model_thalamus_fd)
+
+ggplot(oct_octa_clin_mri_g, aes(x=fd, y= thalamus)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("Fractal dimension vs thalamic volume")
+
+model_chiasm_fd <- lme(fd ~ optic_chiasm*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_chiasm_fd)
+intervals(model_chiasm_fd)
+multicollinearity(model_chiasm_fd)
+
+plot_model(model_chiasm_fd, type = 'emm', terms = c('optic_chiasm', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_chiasm_fd, pairwise ~ oct_optic_neuritis, var = "optic_chiasm", infer = T)
+emtrends(model_chiasm_fd, pairwise ~ oct_optic_neuritis, var = "optic_chiasm", infer = T) %>% plot()
+
+model_occipital_pole_fd <- lme(fd ~ occipital_pole*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_occipital_pole_fd)
+intervals(model_occipital_pole_fd)
+multicollinearity(model_occipital_pole_fd)
+
+ggplot(oct_octa_clin_mri_g, aes(x=fd, y= occipital_pole)) + geom_point() +
+  geom_smooth(method="lm") + ggtitle("FD vs Occipital pole volume")
+
+model_calcarine_fd <- lme(fd ~ calcarine_cortex*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_calcarine_fd)
+intervals(model_calcarine_fd)
+multicollinearity(model_calcarine_fd)
+
+model_sog_fd <- lme(fd ~ superior_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_sog_fd)
+intervals(model_sog_fd)
+multicollinearity(model_sog_fd)
+
+model_iog_fd <- lme(fd ~ inferior_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_iog_fd)
+intervals(model_iog_fd)
+multicollinearity(model_iog_fd)
+
+model_mog_fd <- lme(fd ~ middle_occipital_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_mog_fd)
+intervals(model_mog_fd)
+multicollinearity(model_mog_fd)
+
+plot_model(model_mog_fd, type = 'emm', terms = c('middle_occipital_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_mog_fd, pairwise ~ oct_optic_neuritis, var = "middle_occipital_gyrus", infer = T)
+emtrends(model_mog_fd, pairwise ~ oct_optic_neuritis, var = "middle_occipital_gyrus", infer = T) %>% plot()
+
+model_cun_fd <- lme(fd ~ cuneus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_cun_fd)
+intervals(model_cun_fd)
+multicollinearity(model_cun_fd)
+
+model_OFuG_fd <- lme(fd ~ OFuG*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_fd)
+intervals(model_OFuG_fd)
+multicollinearity(model_OFuG_fd)
+
+plot_model(model_OFuG_fd, type = 'emm', terms = c('OFuG', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_OFuG_fd, pairwise ~ oct_optic_neuritis, var = "OFuG", infer = T)
+emtrends(model_OFuG_fd, pairwise ~ oct_optic_neuritis, var = "OFuG", infer = T) %>% plot()
+
+#Lingual gyrus
+model_lingual_fd <- lme(fd ~ lingual_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_fd)
+intervals(model_lingual_fd)
+multicollinearity(model_lingual_fd)
+
+plot_model(model_lingual_fd, type = 'emm', terms = c('lingual_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_lingual_fd, pairwise ~ oct_optic_neuritis, var = "lingual_gyrus", infer = T)
+emtrends(model_lingual_fd, pairwise ~ oct_optic_neuritis, var = "lingual_gyrus", infer = T) %>% plot()
+
+#STG
+
+model_stg_fd <- lme(fd ~ superior_temporal_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_stg_fd)
+intervals(model_stg_fd)
+multicollinearity(model_stg_fd)
+
+#ITG- ventral stream
+
+model_itg_fd <- lme(fd ~ inferior_temporal_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_itg_fd)
+intervals(model_itg_fd)
+multicollinearity(model_itg_fd)
+
+plot_model(model_itg_fd, type = 'emm', terms = c('inferior_temporal_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_itg_fd, pairwise ~ oct_optic_neuritis, var = "inferior_temporal_gyrus", infer = T)
+emtrends(model_itg_fd, pairwise ~ oct_optic_neuritis, var = "inferior_temporal_gyrus", infer = T) %>% plot()
+
+#SPL
+model_spl_fd <- lme(fd ~ superior_parietal_lobe*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_spl_fd)
+intervals(model_spl_fd)
+multicollinearity(model_spl_fd)
+
+plot_model(model_spl_fd, type = 'emm', terms = c('superior_parietal_lobe', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_spl_fd, pairwise ~ oct_optic_neuritis, var = "superior_parietal_lobe", infer = T)
+emtrends(model_spl_fd, pairwise ~ oct_optic_neuritis, var = "superior_parietal_lobe", infer = T) %>% plot()
+
+#Postcentral gyrus
+model_postcentral_fd <- lme(fd ~ postcentral_gyrus*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_postcentral_fd)
+intervals(model_postcentral_fd)
+multicollinearity(model_postcentral_fd)
+
+plot_model(model_postcentral_fd, type = 'emm', terms = c('postcentral_gyrus', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_postcentral_fd, pairwise ~ oct_optic_neuritis, var = "postcentral_gyrus", infer = T)
+emtrends(model_postcentral_fd, pairwise ~ oct_optic_neuritis, var = "postcentral_gyrus", infer = T) %>% plot()
+
+#Frontal pole
+model_frontal_pole_fd <- lme(fd ~ frontal_pole*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_frontal_pole_fd)
+intervals(model_frontal_pole_fd)
+multicollinearity(model_frontal_pole_fd)
+
+#MFC
+model_MFC_fd <- lme(fd ~ MFC*oct_optic_neuritis + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = oct_octa_clin_mri_g, random=~1|patient_id, na.action=na.omit)
+summary(model_MFC_fd)
+intervals(model_MFC_fd)
+multicollinearity(model_MFC_fd)
+
+plot_model(model_MFC_fd, type = 'emm', terms = c('MFC', 'oct_optic_neuritis'), show.data = T)
+emtrends(model_MFC_fd, pairwise ~ oct_optic_neuritis, var = "MFC", infer = T)
+emtrends(model_MFC_fd, pairwise ~ oct_optic_neuritis, var = "MFC", infer = T) %>% plot()
+
+```
+
+## MRI models- ishihara- FD interactions
+
+```{r}
+
+#Occipital fusiform gyrus
+model_OFuG_fd_non_int <- lme(lcva_ishihara_plates ~ fd + OFuG + fd*OFuG + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_fd_non_int)
+intervals(model_OFuG_fd_non_int)
+multicollinearity(model_OFuG_fd_non_int) 
+
+plot_model(model_OFuG_fd_non_int, type = 'emm', terms = c('fd', 'OFuG'), show.data = T)
+emtrends(model_OFuG_fd_non_int, pairwise ~ OFuG, at =list(OFuG = c(7000, 8000, 9000)), var = "fd", infer = T)
+
+model_OFuG_fd_non <- lme(lcva_ishihara_plates ~ OFuG + fd + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_OFuG_fd_non)
+intervals(model_OFuG_fd_non)
+multicollinearity(model_OFuG_fd_non)
+
+anova(model_OFuG_fd_non, model_OFuG_fd_non_int)
+
+#Lingual gyrus
+#With interaction factor
+model_lingual_fd_non_int <- lme(lcva_ishihara_plates ~ fd + lingual_gyrus + fd*lingual_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_fd_non_int)
+intervals(model_lingual_fd_non_int)
+multicollinearity(model_lingual_fd_non_int) 
+
+#Without interaction factor
+model_lingual_fd_non <- lme(lcva_ishihara_plates ~ fd + lingual_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_lingual_fd_non)
+intervals(model_lingual_fd_non)
+multicollinearity(model_lingual_fd_non) 
+
+anova(model_lingual_fd_non, model_lingual_fd_non_int)
+
+#Inferior temporal lobe
+#With interaction factor
+model_inferior_temporal_fd_non_int <- lme(lcva_ishihara_plates ~ fd + inferior_temporal_gyrus + fd*inferior_temporal_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_inferior_temporal_fd_non_int)
+intervals(model_inferior_temporal_fd_non_int)
+multicollinearity(model_inferior_temporal_fd_non_int) 
+
+#Without interaction factor
+model_inferior_temporal_fd_non <- lme(lcva_ishihara_plates ~ fd + inferior_temporal_gyrus + age + sex  + disease_duration + prop_dmt + gm_adjusted, data = bilateral_non, random=~1|patient_id, na.action=na.omit)
+summary(model_inferior_temporal_fd_non)
+intervals(model_inferior_temporal_fd_non)
+multicollinearity(model_inferior_temporal_fd_non) 
+
+anova(model_inferior_temporal_fd_non, model_inferior_temporal_fd_non_int)
+
+```
